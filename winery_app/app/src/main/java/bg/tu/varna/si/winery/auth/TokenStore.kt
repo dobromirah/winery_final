@@ -10,7 +10,7 @@ private val Context.dataStore by preferencesDataStore("auth")
 
 object TokenStore {
 
-    private val ACCESS_TOKEN = stringPreferencesKey("access_token")
+    private val ACCESS_TOKEN = stringPreferencesKey("accessToken")
 
     suspend fun save(context: Context, token: String) {
         context.dataStore.edit {

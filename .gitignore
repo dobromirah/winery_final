@@ -16,6 +16,10 @@ target/
 # Env / secrets
 .env
 *.env
+POSTGRES_USER=winery
+POSTGRES_PASSWORD=winery123
+KEYCLOAK_ADMIN=admin
+KEYCLOAK_ADMIN_PASSWORD=admin
 
 # Docker
 **/data/
@@ -28,3 +32,8 @@ pgdata/
 
 # Keycloak
 keycloak-data/
+
+.idea/
+**/.idea/
+
+
