@@ -1,0 +1,30 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Android
+.gradle
+/local.properties
+**/build/
+*.iml
+
+# Backend
+node_modules/
+target/
+*.log
+
+# Env / secrets
+.env
+*.env
+
+# Docker
+**/data/
+**/volumes/
+
+# PostgreSQL
+*.db
+postgres-data/
+pgdata/
+
+# Keycloak
+keycloak-data/
