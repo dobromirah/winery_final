@@ -7,6 +7,7 @@ import bg.tu.varna.si.repository.*;
 import bg.tu.varna.si.service.BottleFillingService;
 import bg.tu.varna.si.service.NotificationService;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
@@ -44,6 +45,7 @@ public class BottledWineResource {
 
     // ------------------- LIST -------------------
     @GET
+    @RolesAllowed({"ADMIN", "OPERATOR", "WAREHOUSE_MANAGER"})
     public List<BottledWineResponseDTO> listAll() {
         return bottledRepo.listAll()
                 .stream()
@@ -54,6 +56,7 @@ public class BottledWineResource {
 
     // ------------------- AUTO BOTTLING -------------------
     @POST
+    @RolesAllowed({"OPERATOR", "WAREHOUSE_MANAGER"})
     @Path("/auto")
     @Transactional
     public AutoBottleResponseDTO autoFill(AutoBottleRequestDTO dto) {

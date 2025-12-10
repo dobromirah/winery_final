@@ -6,6 +6,7 @@ import bg.tu.varna.si.mapper.WineBatchMapper;
 import bg.tu.varna.si.model.*;
 import bg.tu.varna.si.repository.*;
 import bg.tu.varna.si.service.NotificationService;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
@@ -28,6 +29,7 @@ public class WineBatchResource {
     @Inject NotificationService notificationService;
 
     @GET
+    @RolesAllowed({"ADMIN", "OPERATOR", "WAREHOUSE_MANAGER"})
     public List<WineBatchResponseDTO> listAll() {
         List<WineBatch> batches = batchRepository.listAll();
 
@@ -41,6 +43,7 @@ public class WineBatchResource {
     }
 
     @GET
+    @RolesAllowed({"ADMIN", "OPERATOR", "WAREHOUSE_MANAGER"})
     @Path("/{id}")
     public WineBatchResponseDTO getById(@PathParam("id") Long id) {
         WineBatch batch = batchRepository.findById(id);
@@ -54,6 +57,7 @@ public class WineBatchResource {
     }
 
     @POST
+    @RolesAllowed("OPERATOR")
     @Transactional
     public WineBatchResponseDTO create(WineBatchCreateDTO dto) {
 
