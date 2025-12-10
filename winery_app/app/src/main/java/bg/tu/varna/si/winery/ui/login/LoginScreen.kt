@@ -10,7 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import bg.tu.varna.si.wineryapp.auth.AuthConfig
+import bg.tu.varna.si.winery.auth.AuthConfig
 import androidx.core.net.toUri
 
 @Composable

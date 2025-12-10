@@ -13,8 +13,8 @@ object AuthConfig {
 
     // Keycloak endpoints
     const val AUTH_ENDPOINT =
-        "http://10.0.2.2:8080/realms/$REALM/protocol/openid-connect/auth"
+        "http://10.0.2.2:8081/realms/$REALM/protocol/openid-connect/auth"
 
     const val TOKEN_ENDPOINT =
-        "http://10.0.2.2:8080/realms/$REALM/protocol/openid-connect/token"
+        "http://10.0.2.2:8081/realms/$REALM/protocol/openid-connect/token"
 }
