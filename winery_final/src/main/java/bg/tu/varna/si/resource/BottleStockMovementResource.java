@@ -5,6 +5,7 @@ import bg.tu.varna.si.dto.BottleStockMovementResponseDTO;
 import bg.tu.varna.si.mapper.BottleStockMovementMapper;
 import bg.tu.varna.si.model.*;
 import bg.tu.varna.si.repository.*;
+import bg.tu.varna.si.service.CurrentUserService;
 import bg.tu.varna.si.service.NotificationService;
 
 import jakarta.annotation.security.RolesAllowed;
@@ -64,8 +65,12 @@ public class BottleStockMovementResource {
     // -------------------------------------------------------
     // CREATE STOCK MOVEMENT
     // -------------------------------------------------------
+
+    @Inject
+    CurrentUserService currentUserService;
+
     @POST
-    @RolesAllowed("WAREHOUSE_MANAGER")
+    @RolesAllowed({"WAREHOUSE_MANAGER", "ADMIN"}) // временно за тест
     @Transactional
     public BottleStockMovementResponseDTO create(BottleStockMovementCreateDTO dto) {
 
@@ -73,23 +78,19 @@ public class BottleStockMovementResource {
         if (bottleType == null)
             throw new NotFoundException("BottleType with ID " + dto.bottleTypeId + " not found");
 
-        AppUser user = userRepository.findById(dto.createdById);
-        if (user == null)
-            throw new NotFoundException("User with ID " + dto.createdById + " not found");
+        AppUser user = currentUserService.getCurrentUser(); // ✅ от JWT
 
         BottleStockMovement movement =
                 BottleStockMovementMapper.fromCreateDTO(dto, bottleType, user);
 
         repository.persist(movement);
 
-        // Compute new stock
         int totalQty = repository.getTotalQuantityForBottle(bottleType.id);
-
-        // Notify if below minimum
         notificationService.checkBottleLevels(bottleType, totalQty);
 
         return BottleStockMovementMapper.toDTO(movement);
     }
+
 
     // -------------------------------------------------------
     // DELETE MOVEMENT

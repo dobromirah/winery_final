@@ -9,6 +9,7 @@ repositories {
 }
 
 dependencies {
+    implementation("io.quarkus:quarkus-smallrye-jwt")
     implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
     implementation 'io.quarkus:quarkus-rest'
     implementation 'io.quarkus:quarkus-rest-jackson'

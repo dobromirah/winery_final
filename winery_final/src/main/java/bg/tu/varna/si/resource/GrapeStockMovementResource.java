@@ -5,6 +5,7 @@ import bg.tu.varna.si.dto.GrapeStockMovementResponseDTO;
 import bg.tu.varna.si.mapper.GrapeStockMovementMapper;
 import bg.tu.varna.si.model.*;
 import bg.tu.varna.si.repository.*;
+import bg.tu.varna.si.service.CurrentUserService;
 import bg.tu.varna.si.service.NotificationService;
 
 import jakarta.annotation.security.RolesAllowed;
@@ -64,8 +65,11 @@ public class GrapeStockMovementResource {
     // -------------------------------------------------------
     // CREATE STOCK MOVEMENT
     // -------------------------------------------------------
+    @Inject
+    CurrentUserService currentUserService;
+
     @POST
-    @RolesAllowed("WAREHOUSE_MANAGER")
+    @RolesAllowed({"WAREHOUSE_MANAGER", "ADMIN"}) // временно за тест
     @Transactional
     public GrapeStockMovementResponseDTO create(GrapeStockMovementCreateDTO dto) {
 
@@ -74,12 +78,8 @@ public class GrapeStockMovementResource {
             throw new NotFoundException("Grape variety with ID " + dto.varietyId + " not found");
         }
 
-        AppUser user = userRepository.findById(dto.createdById);
-        if (user == null) {
-            throw new NotFoundException("User with ID " + dto.createdById + " not found");
-        }
+        AppUser user = currentUserService.getCurrentUser(); // ✅ от JWT
 
-        // Create entity
         GrapeStockMovement entity = new GrapeStockMovement();
         entity.variety = variety;
         entity.quantityKg = dto.quantityKg;
@@ -88,12 +88,12 @@ public class GrapeStockMovementResource {
 
         repository.persist(entity);
 
-        // Recalculate stock and trigger notifications
         double totalKg = repository.getTotalKgForVariety(variety.id);
         notificationService.checkGrapeLevels(variety, totalKg);
 
         return GrapeStockMovementMapper.toDTO(entity);
     }
+
 
     // -------------------------------------------------------
     // DELETE MOVEMENT
