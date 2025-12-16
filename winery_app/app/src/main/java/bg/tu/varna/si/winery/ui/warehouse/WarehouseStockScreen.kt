@@ -12,23 +12,34 @@ import bg.tu.varna.si.winery.dto.GrapeStockReportDto
 
 @Composable
 fun WarehouseStockScreen(
-    vm: WarehouseStockViewModel
+    vm: WarehouseStockViewModel,
+    contentPadding: PaddingValues = PaddingValues()
 ) {
     val grapes by vm.grapes.collectAsState()
     val bottles by vm.bottles.collectAsState()
     val loading by vm.loading.collectAsState()
+    val error by vm.error.collectAsState()
 
     LaunchedEffect(Unit) { vm.load() }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(contentPadding)
+            .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
             Text("Warehouse Stock", style = MaterialTheme.typography.titleLarge)
+
             if (loading) {
                 Spacer(Modifier.height(10.dp))
                 LinearProgressIndicator(Modifier.fillMaxWidth())
+            }
+
+            if (error != null) {
+                Spacer(Modifier.height(10.dp))
+                Text("Error: $error")
             }
         }
 

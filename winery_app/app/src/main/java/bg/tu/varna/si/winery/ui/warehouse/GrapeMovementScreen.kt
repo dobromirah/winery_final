@@ -8,7 +8,10 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GrapeMovementScreen(vm: GrapeMovementViewModel, onLogout: () -> Unit) {
+fun GrapeMovementScreen(
+    vm: GrapeMovementViewModel,
+    contentPadding: PaddingValues = PaddingValues()
+) {
     val varieties by vm.varieties.collectAsState()
     val loading by vm.loading.collectAsState()
     val error by vm.error.collectAsState()
@@ -16,12 +19,16 @@ fun GrapeMovementScreen(vm: GrapeMovementViewModel, onLogout: () -> Unit) {
 
     var selectedId by remember { mutableStateOf<Long?>(null) }
     var qtyText by remember { mutableStateOf("") }
-    var createdByText by remember { mutableStateOf("") }
-    var movementType by remember { mutableStateOf("IN") } // default
+    var movementType by remember { mutableStateOf("IN") }
 
     LaunchedEffect(Unit) { vm.loadVarieties() }
 
-    Column(Modifier.fillMaxSize().padding(16.dp)) {
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(contentPadding)
+            .padding(16.dp)
+    ) {
         Text("Grape Stock Movement", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(12.dp))
 
@@ -40,29 +47,16 @@ fun GrapeMovementScreen(vm: GrapeMovementViewModel, onLogout: () -> Unit) {
             Spacer(Modifier.height(12.dp))
         }
 
-        // Movement type
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(
-                onClick = { movementType = "IN" },
-                enabled = movementType != "IN"
-            ) { Text("IN") }
-
-            Button(
-                onClick = { movementType = "OUT" },
-                enabled = movementType != "OUT"
-            ) { Text("OUT") }
-            Button(onClick = onLogout) {
-                Text("Logout")
-            }
-
+            Button(onClick = { movementType = "IN" }, enabled = movementType != "IN") { Text("IN") }
+            Button(onClick = { movementType = "OUT" }, enabled = movementType != "OUT") { Text("OUT") }
         }
-
 
         Spacer(Modifier.height(12.dp))
 
-        // Variety dropdown
         var expanded by remember { mutableStateOf(false) }
-        val selectedLabel = varieties.firstOrNull { it.id == selectedId }?.let { "${it.name} (${it.category})" }
+        val selectedLabel = varieties.firstOrNull { it.id == selectedId }
+            ?.let { "${it.name} (${it.category})" }
             ?: "Select grape variety"
 
         ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
@@ -95,23 +89,13 @@ fun GrapeMovementScreen(vm: GrapeMovementViewModel, onLogout: () -> Unit) {
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(Modifier.height(12.dp))
-
-        OutlinedTextField(
-            value = createdByText,
-            onValueChange = { createdByText = it },
-            label = { Text("CreatedById (temporary)") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
         Spacer(Modifier.height(16.dp))
 
         Button(
             onClick = {
                 val vId = selectedId ?: return@Button
                 val qty = qtyText.toDoubleOrNull() ?: return@Button
-                val createdBy = createdByText.toLongOrNull() ?: return@Button
-                vm.submit(vId, qty, movementType, createdBy)
+                vm.submit(vId, qty, movementType)
             },
             modifier = Modifier.fillMaxWidth(),
             enabled = !loading

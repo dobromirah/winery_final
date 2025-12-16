@@ -1,0 +1,26 @@
+{
+  "realm" : "master",
+  "users" : [ {
+    "id" : "faf13750-6643-46d9-bb04-aeaf78273123",
+    "createdTimestamp" : 1765401460067,
+    "username" : "admin",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : false,
+    "credentials" : [ {
+      "id" : "d03ed93a-c07a-4f14-8e21-a72068327d54",
+      "type" : "password",
+      "createdDate" : 1765401460142,
+      "secretData" : "{\"value\":\"IJjy5gkMqGnifc2+AiaS3MUuHbukrMHUOcUiSYHRu0I=\",\"salt\":\"pJAYBy0/c6Dnk+VdADmSgg==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "admin", "default-roles-master" ],
+    "clientRoles" : {
+      "winery-realm-realm" : [ "manage-clients", "view-authorization", "view-clients", "query-clients", "view-realm", "manage-events", "query-realms", "create-client", "manage-identity-providers", "view-users", "view-identity-providers", "query-users", "manage-realm", "manage-users", "query-groups", "manage-authorization", "view-events" ]
+    },
+    "notBefore" : 0,
+    "groups" : [ ]
+  } ]
+}

@@ -5,6 +5,7 @@ import bg.tu.varna.si.dto.WineBatchResponseDTO;
 import bg.tu.varna.si.mapper.WineBatchMapper;
 import bg.tu.varna.si.model.*;
 import bg.tu.varna.si.repository.*;
+import bg.tu.varna.si.service.CurrentUserService;
 import bg.tu.varna.si.service.NotificationService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -23,11 +24,12 @@ public class WineBatchResource {
     @Inject WineBatchRepository batchRepository;
     @Inject WineBatchGrapeUsageRepository usageRepository;
     @Inject WineTypeRepository wineTypeRepository;
-    @Inject AppUserRepository userRepository;
     @Inject WineRecipeRepository recipeRepository;
     @Inject GrapeStockMovementRepository grapeStockRepository;
     @Inject NotificationService notificationService;
+    @Inject CurrentUserService currentUserService;
 
+    // ------------------- LIST -------------------
     @GET
     @RolesAllowed({"ADMIN", "OPERATOR", "WAREHOUSE_MANAGER"})
     public List<WineBatchResponseDTO> listAll() {
@@ -42,6 +44,7 @@ public class WineBatchResource {
                 .collect(Collectors.toList());
     }
 
+    // ------------------- GET BY ID -------------------
     @GET
     @RolesAllowed({"ADMIN", "OPERATOR", "WAREHOUSE_MANAGER"})
     @Path("/{id}")
@@ -56,6 +59,7 @@ public class WineBatchResource {
         return WineBatchMapper.toDTO(batch, usages);
     }
 
+    // ------------------- CREATE -------------------
     @POST
     @RolesAllowed("OPERATOR")
     @Transactional
@@ -66,10 +70,8 @@ public class WineBatchResource {
         if (wineType == null)
             throw new NotFoundException("WineType with ID " + dto.wineTypeId + " not found.");
 
-        // Validate user
-        AppUser user = userRepository.findById(Long.valueOf(dto.createdById));
-        if (user == null)
-            throw new NotFoundException("User with ID " + dto.createdById + " not found.");
+        // ✅ Current user from JWT (no createdById from client)
+        AppUser user = currentUserService.getCurrentUser();
 
         // Validate recipe
         List<WineRecipe> recipe = recipeRepository.findByWineTypeId(dto.wineTypeId);
@@ -77,7 +79,7 @@ public class WineBatchResource {
             throw new WebApplicationException("This wine type has no recipe defined.", 400);
         }
 
-        // Create wine batch
+        // Create wine batch (createdBy = JWT user)
         WineBatch batch = WineBatchMapper.fromCreateDTO(dto, wineType, user);
         batchRepository.persist(batch);
 

@@ -1,0 +1,64 @@
+{
+  "realm" : "winery-realm",
+  "users" : [ {
+    "id" : "7a160d62-ac76-4f63-9aa9-fec6dc323c93",
+    "createdTimestamp" : 1765402149418,
+    "username" : "admin",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : false,
+    "credentials" : [ {
+      "id" : "8c2ef42f-cbb3-4c11-8899-01bc0e377fa6",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1765562456551,
+      "secretData" : "{\"value\":\"/YVmrGeKtmObTQYdjU9XP+D9leUWKouGGgJpt6nKiVU=\",\"salt\":\"NpxEvn73KFFlwa73Dt1nyQ==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-winery-realm", "ADMIN" ],
+    "notBefore" : 0,
+    "groups" : [ "/ADMIN" ]
+  }, {
+    "id" : "8a73df8a-4b20-4d7e-a975-50b2c9c6d553",
+    "createdTimestamp" : 1765402193342,
+    "username" : "operator1",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : false,
+    "credentials" : [ {
+      "id" : "62ede7ee-12ee-4f1e-b68a-a0efcd5800c4",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1765565479573,
+      "secretData" : "{\"value\":\"Uc/+Ut9cAXwtY68ZWZ80HbwIPkz+OHa/YoZqAujxHdE=\",\"salt\":\"MBxmo5KE4JfGFQa4oxB++Q==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-winery-realm", "OPERATOR" ],
+    "notBefore" : 0,
+    "groups" : [ "/OPERATOR" ]
+  }, {
+    "id" : "0d3818ec-de48-44d4-bafa-093018c3dec0",
+    "createdTimestamp" : 1765402228221,
+    "username" : "warehouse1",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : false,
+    "credentials" : [ {
+      "id" : "01240229-1489-4501-9989-caa8b3c468ff",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1765565878194,
+      "secretData" : "{\"value\":\"IBGRRompbhpZdCCpG4u9s9jUyun3YEYVmoSg1K5ioZQ=\",\"salt\":\"2m3/T4QpGTw1gVTk6N2Fbg==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-winery-realm", "WAREHOUSE_MANAGER" ],
+    "notBefore" : 0,
+    "groups" : [ "/WAREHOUSE_MANAGER" ]
+  } ]
+}

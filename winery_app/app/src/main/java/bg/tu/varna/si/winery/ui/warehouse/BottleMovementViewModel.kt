@@ -42,7 +42,7 @@ class BottleMovementViewModel(
         }
     }
 
-    fun submit(bottleTypeId: Long, qty: Int, movementType: String, createdById: Long) {
+    fun submit(bottleTypeId: Long, qty: Int, movementType: String) {
         viewModelScope.launch {
             _loading.value = true
             _error.value = null
@@ -52,8 +52,7 @@ class BottleMovementViewModel(
                     BottleStockMovementCreateDto(
                         bottleTypeId = bottleTypeId,
                         quantity = qty,
-                        movementType = movementType,
-                        createdById = createdById
+                        movementType = movementType
                     )
                 )
                 _success.value = "✅ Movement saved"

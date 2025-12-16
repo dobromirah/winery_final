@@ -4,11 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -17,7 +13,8 @@ import bg.tu.varna.si.winery.dto.NotificationDto
 @Composable
 fun NotificationsScreen(
     vm: NotificationsViewModel,
-    onLogout: () -> Unit
+    contentPadding: PaddingValues = PaddingValues(),
+    onMarkedRead: () -> Unit = {}
 ) {
     val items by vm.items.collectAsState()
     val loading by vm.loading.collectAsState()
@@ -28,19 +25,10 @@ fun NotificationsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .padding(contentPadding)
             .padding(16.dp)
     ) {
-        // Header row: title + logout
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text("Notifications (Unread)", style = MaterialTheme.typography.titleLarge)
-            Button(onClick = onLogout) {
-                Text("Logout")
-            }
-        }
-
+        Text("Unread notifications", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(12.dp))
 
         if (loading) {
@@ -62,7 +50,10 @@ fun NotificationsScreen(
             items(items) { n ->
                 NotificationCard(
                     n = n,
-                    onMarkRead = { vm.markAsRead(n.id) }
+                    onMarkRead = {
+                        vm.markAsRead(n.id)
+                        onMarkedRead()
+                    }
                 )
             }
         }

@@ -8,7 +8,10 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottleMovementScreen(vm: BottleMovementViewModel) {
+fun BottleMovementScreen(
+    vm: BottleMovementViewModel,
+    contentPadding: PaddingValues = PaddingValues()
+) {
     val types by vm.types.collectAsState()
     val loading by vm.loading.collectAsState()
     val error by vm.error.collectAsState()
@@ -16,12 +19,16 @@ fun BottleMovementScreen(vm: BottleMovementViewModel) {
 
     var selectedId by remember { mutableStateOf<Long?>(null) }
     var qtyText by remember { mutableStateOf("") }
-    var createdByText by remember { mutableStateOf("") }
     var movementType by remember { mutableStateOf("IN") }
 
     LaunchedEffect(Unit) { vm.loadBottleTypes() }
 
-    Column(Modifier.fillMaxSize().padding(16.dp)) {
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(contentPadding)
+            .padding(16.dp)
+    ) {
         Text("Bottle Stock Movement", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(12.dp))
 
@@ -48,7 +55,8 @@ fun BottleMovementScreen(vm: BottleMovementViewModel) {
         Spacer(Modifier.height(12.dp))
 
         var expanded by remember { mutableStateOf(false) }
-        val selectedLabel = types.firstOrNull { it.id == selectedId }?.let { "${it.description} (${it.volumeMl}ml)" }
+        val selectedLabel = types.firstOrNull { it.id == selectedId }
+            ?.let { "${it.description} (${it.volumeMl}ml)" }
             ?: "Select bottle type"
 
         ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
@@ -81,23 +89,13 @@ fun BottleMovementScreen(vm: BottleMovementViewModel) {
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(Modifier.height(12.dp))
-
-        OutlinedTextField(
-            value = createdByText,
-            onValueChange = { createdByText = it },
-            label = { Text("CreatedById (temporary)") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
         Spacer(Modifier.height(16.dp))
 
         Button(
             onClick = {
                 val tId = selectedId ?: return@Button
                 val qty = qtyText.toIntOrNull() ?: return@Button
-                val createdBy = createdByText.toLongOrNull() ?: return@Button
-                vm.submit(tId, qty, movementType, createdBy)
+                vm.submit(tId, qty, movementType)
             },
             modifier = Modifier.fillMaxWidth(),
             enabled = !loading

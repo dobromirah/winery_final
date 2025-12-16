@@ -10,7 +10,9 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,9 +32,7 @@ public class ReportResource {
 
     @Inject BottledWineRepository bottledWineRepo;
 
-    // -------------------------------------------------------
-    // GRAPE STOCK REPORT
-    // -------------------------------------------------------
+    // ---------------- GRAPE STOCK REPORT ----------------
     @GET
     @Path("/grapes")
     @RolesAllowed({"ADMIN", "WAREHOUSE_MANAGER", "OPERATOR"})
@@ -55,9 +55,7 @@ public class ReportResource {
                 .collect(Collectors.toList());
     }
 
-    // -------------------------------------------------------
-    // BOTTLE STOCK REPORT
-    // -------------------------------------------------------
+    // ---------------- BOTTLE STOCK REPORT ----------------
     @GET
     @Path("/bottles")
     @RolesAllowed({"ADMIN", "WAREHOUSE_MANAGER", "OPERATOR"})
@@ -80,9 +78,7 @@ public class ReportResource {
                 .collect(Collectors.toList());
     }
 
-    // -------------------------------------------------------
-    // WINE BATCH PRODUCTION REPORT (OPTIONAL DATE RANGE)
-    // -------------------------------------------------------
+    // ---------------- WINE BATCH REPORT (with optional range) ----------------
     @GET
     @Path("/batches")
     @RolesAllowed({"ADMIN", "WAREHOUSE_MANAGER", "OPERATOR"})
@@ -90,16 +86,24 @@ public class ReportResource {
             @QueryParam("from") String from,
             @QueryParam("to") String to
     ) {
-        LocalDateTime fromDate = parseDate(from);
-        LocalDateTime toDate = parseDate(to);
+        LocalDateTime fromDate = parseFlexibleDateTimeStart(from);
+        LocalDateTime toDate = parseFlexibleDateTimeEnd(to);
 
         List<WineBatch> batches = batchRepo.listAll();
 
-        if (fromDate != null)
-            batches = batches.stream().filter(b -> b.createdAt.isAfter(fromDate)).toList();
+        if (fromDate != null) {
+            // inclusive: createdAt >= fromDate
+            batches = batches.stream()
+                    .filter(b -> !b.createdAt.isBefore(fromDate))
+                    .toList();
+        }
 
-        if (toDate != null)
-            batches = batches.stream().filter(b -> b.createdAt.isBefore(toDate)).toList();
+        if (toDate != null) {
+            // inclusive: createdAt <= toDate
+            batches = batches.stream()
+                    .filter(b -> !b.createdAt.isAfter(toDate))
+                    .toList();
+        }
 
         return batches.stream()
                 .map(batch -> {
@@ -110,14 +114,11 @@ public class ReportResource {
                 .collect(Collectors.toList());
     }
 
-    // -------------------------------------------------------
-    // BOTTLED WINE REPORT
-    // -------------------------------------------------------
+    // ---------------- BOTTLED WINE REPORT ----------------
     @GET
     @Path("/bottled-wine")
     @RolesAllowed({"ADMIN", "WAREHOUSE_MANAGER", "OPERATOR"})
     public List<BottledWineReportDTO> bottledWineReport() {
-
         return bottledWineRepo.listAll()
                 .stream()
                 .map(b -> {
@@ -138,11 +139,33 @@ public class ReportResource {
                 .collect(Collectors.toList());
     }
 
-    // Utility to parse date safely
-    private LocalDateTime parseDate(String date) {
-        if (date == null) return null;
+    // Accepts:
+    // - "2025-12-14"  -> start of day
+    // - "2025-12-14T10:15:30"
+    private LocalDateTime parseFlexibleDateTimeStart(String s) {
+        if (s == null || s.isBlank()) return null;
+
         try {
-            return LocalDateTime.parse(date);
+            if (s.length() == 10) { // yyyy-MM-dd
+                return LocalDate.parse(s).atStartOfDay();
+            }
+            return LocalDateTime.parse(s, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        } catch (DateTimeParseException e) {
+            return null;
+        }
+    }
+
+    // Accepts:
+    // - "2025-12-14"  -> end of day
+    // - "2025-12-14T10:15:30"
+    private LocalDateTime parseFlexibleDateTimeEnd(String s) {
+        if (s == null || s.isBlank()) return null;
+
+        try {
+            if (s.length() == 10) { // yyyy-MM-dd
+                return LocalDate.parse(s).atTime(23, 59, 59);
+            }
+            return LocalDateTime.parse(s, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         } catch (DateTimeParseException e) {
             return null;
         }

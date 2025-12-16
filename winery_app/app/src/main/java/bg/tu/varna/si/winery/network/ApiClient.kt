@@ -7,17 +7,19 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object ApiClient {
 
-    // Quarkus base url (Android emulator -> host)
+    // IMPORTANT: baseUrl is your QUARKUS backend, not Keycloak
+    // emulator -> your host machine LAN ip OR 10.0.2.2 if backend is on host and exposed
     private const val BASE_URL = "http://10.0.2.2:8082/"
 
     fun create(context: Context): Retrofit {
-        val client = OkHttpClient.Builder()
-            .addInterceptor(AuthInterceptor(context))
+        val okHttp = OkHttpClient.Builder()
+            .addInterceptor(AuthHeaderInterceptor(context))
+            .authenticator(TokenRefreshAuthenticator(context))
             .build()
 
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .client(client)
+            .client(okHttp)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }

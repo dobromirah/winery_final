@@ -21,6 +21,8 @@ class WarehouseStockViewModel(
 
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
 
     fun load() {
         viewModelScope.launch {
@@ -28,9 +30,11 @@ class WarehouseStockViewModel(
             try {
                 _grapes.value = repo.grapeStock()
                 _bottles.value = repo.bottleStock()
-            } finally {
+            }catch (e: Exception) { _error.value = e.message ?: "Unknown error" }
+            finally {
                 _loading.value = false
             }
+
         }
     }
 }
