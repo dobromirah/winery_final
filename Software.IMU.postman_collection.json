@@ -1,0 +1,1456 @@
+{
+	"info": {
+		"_postman_id": "d2ce2c71-94db-42f8-9804-b566e45441f3",
+		"name": "Software.IMU",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45511932",
+		"_collection_link": "https://dobromirahristova.postman.co/workspace/Dobromira-Hristova's-Workspace~d91c656d-4a0d-49ae-8308-f3b3c41e282d/collection/45511932-d2ce2c71-94db-42f8-9804-b566e45441f3?action=share&source=collection_link&creator=45511932"
+	},
+	"item": [
+		{
+			"name": "KeyCloak",
+			"item": [
+				{
+					"name": "User Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "alice",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "alice",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "backend-service",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "secret",
+									"type": "text"
+								},
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:62443/realms/quarkus/protocol/openid-connect/token",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "62443",
+							"path": [
+								"realms",
+								"quarkus",
+								"protocol",
+								"openid-connect",
+								"token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "admin",
+									"type": "text"
+								},
+								{
+									"key": "client_id",
+									"value": "backend-service",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "secret",
+									"type": "text"
+								},
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:62443/realms/quarkus/protocol/openid-connect/token",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "62443",
+							"path": [
+								"realms",
+								"quarkus",
+								"protocol",
+								"openid-connect",
+								"token"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "quarkusAPI",
+			"item": [
+				{
+					"name": "User Request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJaXzg2UlhKV0ptMmlkVW5rMUg4WkVXQU1zNm4tZ3c5ZTFoVzk2X25OOVFrIn0.eyJleHAiOjE3NDU4NTA2NjIsImlhdCI6MTc0NTg1MDM2MiwianRpIjoiODM1ZjQ5OTEtMzgwZS00ZjM4LTgwMzItZDNjYTc0Y2FmZDgxIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo2MjQ0My9yZWFsbXMvcXVhcmt1cyIsInN1YiI6ImViNDEyM2EzLWI3MjItNDc5OC05YWY1LTg5NTdmODIzNjU3YSIsInR5cCI6IkJlYXJlciIsImF6cCI6ImJhY2tlbmQtc2VydmljZSIsInNlc3Npb25fc3RhdGUiOiJlYmJkM2ExOS01ZmQxLTQxY2ItYTcwOS02MTFiMTI4OTNmZTAiLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsidXNlciJdfSwic2NvcGUiOiJlbWFpbCBwcm9maWxlIiwic2lkIjoiZWJiZDNhMTktNWZkMS00MWNiLWE3MDktNjExYjEyODkzZmUwIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhbGljZSJ9.OVoUMx9G1iCwSE0SU0mHg4TIGPJycpOR_Zq-szjVgRjsmCBNvLjK9lawsaR4pg-4QT4eMmyOYEArzjh8nHEmvAMc8P-SAwbLg2v3y9i8_WsANwaO-1CEA8YkVzQdWCIsjKK1s6GhM55E-wYsp7vv2nYkHyeS03gtKjTH5YlApIb-uEzWXznh9N8Nx_-0pCprzzSWT-zEblQnPbfRtL2MYjEdC7wr3DNUoEPiH69KiYGx5VwuPc3db2pKd8biWiKYLf5wEgEHvdGxNF1dPNKr3NXcZV32Okb5hWZ9QgbYQTnOSdw0kKePyhtMhzFwp_1VaU8w38tgf7kGivvVeiaplg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/api/users",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Admin Request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJaXzg2UlhKV0ptMmlkVW5rMUg4WkVXQU1zNm4tZ3c5ZTFoVzk2X25OOVFrIn0.eyJleHAiOjE3NDU4NTA2NjIsImlhdCI6MTc0NTg1MDM2MiwianRpIjoiODM1ZjQ5OTEtMzgwZS00ZjM4LTgwMzItZDNjYTc0Y2FmZDgxIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo2MjQ0My9yZWFsbXMvcXVhcmt1cyIsInN1YiI6ImViNDEyM2EzLWI3MjItNDc5OC05YWY1LTg5NTdmODIzNjU3YSIsInR5cCI6IkJlYXJlciIsImF6cCI6ImJhY2tlbmQtc2VydmljZSIsInNlc3Npb25fc3RhdGUiOiJlYmJkM2ExOS01ZmQxLTQxY2ItYTcwOS02MTFiMTI4OTNmZTAiLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsidXNlciJdfSwic2NvcGUiOiJlbWFpbCBwcm9maWxlIiwic2lkIjoiZWJiZDNhMTktNWZkMS00MWNiLWE3MDktNjExYjEyODkzZmUwIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhbGljZSJ9.OVoUMx9G1iCwSE0SU0mHg4TIGPJycpOR_Zq-szjVgRjsmCBNvLjK9lawsaR4pg-4QT4eMmyOYEArzjh8nHEmvAMc8P-SAwbLg2v3y9i8_WsANwaO-1CEA8YkVzQdWCIsjKK1s6GhM55E-wYsp7vv2nYkHyeS03gtKjTH5YlApIb-uEzWXznh9N8Nx_-0pCprzzSWT-zEblQnPbfRtL2MYjEdC7wr3DNUoEPiH69KiYGx5VwuPc3db2pKd8biWiKYLf5wEgEHvdGxNF1dPNKr3NXcZV32Okb5hWZ9QgbYQTnOSdw0kKePyhtMhzFwp_1VaU8w38tgf7kGivvVeiaplg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/api/admin",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"admin"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Winery",
+			"item": [
+				{
+					"name": "Wine Batches",
+					"item": [
+						{
+							"name": "Get Wine batches",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJCLWdzc3ZheF93MkJfaGZ1SnFLYmZqblJMYkdmMlhuQWRzdHhnbmNxNE1NIn0.eyJleHAiOjE3NjQ0NTk1ODcsImlhdCI6MTc2NDQ1OTI4NywianRpIjoiYmEwYjQ3NDktNWIwYS00ZTQ2LTljODctZjNlYWVjZmRhOWI5IiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgxL3JlYWxtcy93aW5lcnktcmVhbG0iLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiY2RlN2ZkN2UtMjU2ZS00YjdhLTg0MTUtYTQzZTBmNjM2YTkxIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoid2luZXJ5LWJhY2tlbmQiLCJzZXNzaW9uX3N0YXRlIjoiMWFiZTIxYmMtMmU4MC00MTRiLWEyMTYtYmZmYmFhMjQ3ZGQwIiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vbG9jYWxob3N0OjgwODAiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIk9QRVJBVE9SIiwib2ZmbGluZV9hY2Nlc3MiLCJkZWZhdWx0LXJvbGVzLXdpbmVyeS1yZWFsbSIsInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwic2lkIjoiMWFiZTIxYmMtMmU4MC00MTRiLWEyMTYtYmZmYmFhMjQ3ZGQwIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJvcGVyYXRvcjEifQ.VMis_gzRoaJg58b1FqbwEJKUatV01AoF3VhQjlTxEaEpv1pJu02xTHnk5m5bdjfuQjhwNcxDMN-xh4-xQdfpwC_iB4PH5hTJ8UAr-ozqqjMnE1znJ8TDjsd7Bob2VxwYpBa3P5bzadMgb1snAQ7oVem2b45R7iEqU1u6A1BSrNoXlM5IHFMPEhikVq0BCJRwAOLC1RXcpUqXPyNS5AlcLj6Dd3XSM6bJGjeO32nEJEM3svqhT_oqe_TwYa_5rD4sc3UPIo3j6VTnl8Lj7t2GY2EhQIRphPop2102H9wDsmfirCdtU7F6DavjC7Ilr1959gCbVXxUdIrWYaXItw25vg",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/wine-batches",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"wine-batches"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create Wine batch",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"wineTypeId\": 52,\r\n  \"plannedLiters\": 1000,\r\n  \"createdById\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURL}}/wine-batches",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"wine-batches"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Grape Varieties",
+					"item": [
+						{
+							"name": "Get Grape varieties",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/grape-varieties",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"grape-varieties"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Grape varieties",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Riesling\",\r\n  \"category\": \"WHITE\",\r\n  \"yieldLitersPerKg\": 0.69,\r\n  \"criticalMinKg\": 120\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURL}}/grape-varieties/{id}",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"grape-varieties",
+										"{id}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create Grape varieties",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Riesling\",\r\n  \"category\": \"WHITE\",\r\n  \"yieldLitersPerKg\": 0.69,\r\n  \"criticalMinKg\": 120\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURL}}/grape-varieties",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"grape-varieties"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Grape varieties",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "{{baseURL}}/grape-varieties/{id}",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"grape-varieties",
+										"{id}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Bottle Types",
+					"item": [
+						{
+							"name": "Update Bottle type",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"volumeMl\": 750,\r\n  \"description\": \"Standard Wine Bottle\",\r\n  \"criticalMinQty\": 50\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURL}}/bottle-types/{id}",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"bottle-types",
+										"{id}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Bottle types",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJCLWdzc3ZheF93MkJfaGZ1SnFLYmZqblJMYkdmMlhuQWRzdHhnbmNxNE1NIn0.eyJleHAiOjE3NjQ0NTk1ODcsImlhdCI6MTc2NDQ1OTI4NywianRpIjoiYmEwYjQ3NDktNWIwYS00ZTQ2LTljODctZjNlYWVjZmRhOWI5IiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgxL3JlYWxtcy93aW5lcnktcmVhbG0iLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiY2RlN2ZkN2UtMjU2ZS00YjdhLTg0MTUtYTQzZTBmNjM2YTkxIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoid2luZXJ5LWJhY2tlbmQiLCJzZXNzaW9uX3N0YXRlIjoiMWFiZTIxYmMtMmU4MC00MTRiLWEyMTYtYmZmYmFhMjQ3ZGQwIiwiYWNyIjoiMSIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vbG9jYWxob3N0OjgwODAiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIk9QRVJBVE9SIiwib2ZmbGluZV9hY2Nlc3MiLCJkZWZhdWx0LXJvbGVzLXdpbmVyeS1yZWFsbSIsInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwic2lkIjoiMWFiZTIxYmMtMmU4MC00MTRiLWEyMTYtYmZmYmFhMjQ3ZGQwIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJvcGVyYXRvcjEifQ.VMis_gzRoaJg58b1FqbwEJKUatV01AoF3VhQjlTxEaEpv1pJu02xTHnk5m5bdjfuQjhwNcxDMN-xh4-xQdfpwC_iB4PH5hTJ8UAr-ozqqjMnE1znJ8TDjsd7Bob2VxwYpBa3P5bzadMgb1snAQ7oVem2b45R7iEqU1u6A1BSrNoXlM5IHFMPEhikVq0BCJRwAOLC1RXcpUqXPyNS5AlcLj6Dd3XSM6bJGjeO32nEJEM3svqhT_oqe_TwYa_5rD4sc3UPIo3j6VTnl8Lj7t2GY2EhQIRphPop2102H9wDsmfirCdtU7F6DavjC7Ilr1959gCbVXxUdIrWYaXItw25vg",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/bottle-types",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"bottle-types"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Bottle type",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/bottle-types/{id}",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"bottle-types",
+										"{id}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create Bottle type",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"volumeMl\": 750,\r\n  \"description\": \"Standard Wine Bottle\",\r\n  \"criticalMinQty\": 50\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURL}}/bottle-types",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"bottle-types"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Grape Stock Movement",
+					"item": [
+						{
+							"name": "Create Grape stock",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"varietyId\": 1,\r\n  \"quantityKg\": 250,\r\n  \"movementType\": \"IN\",\r\n  \"createdById\": 4\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURL}}/grape-stock",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"grape-stock"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Grape stock",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"varietyId\": 1,\r\n  \"quantityKg\": 250,\r\n  \"movementType\": \"IN\",\r\n  \"createdById\": 4\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURL}}/grape-stock{id}",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"grape-stock{id}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Grape stock",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/grape-stock/{id}",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"grape-stock",
+										"{id}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Grape stock",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/grape-stock",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"grape-stock"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Users",
+					"item": [
+						{
+							"name": "Get Users",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/users",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"users"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Users by role",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/users/role/ADMIN",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"users",
+										"role",
+										"ADMIN"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete User",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/users/{id}",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"users",
+										"{id}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update User",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"keycloakId\": \"12345\",\r\n  \"fullName\": \"John Winemaker\",\r\n  \"role\": \"OPERATOR\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURL}}/users/{id}",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"users",
+										"{id}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create User",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"keycloakId\": \"12345\",\r\n  \"fullName\": \"John Winemaker\",\r\n  \"role\": \"OPERATOR\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURL}}/users",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"users"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Bottle Stock Movement",
+					"item": [
+						{
+							"name": "Create Stock movement",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"bottleTypeId\": 1,\r\n  \"quantity\": 100,\r\n  \"movementType\": \"IN\",\r\n  \"createdById\": 2\r\n}\r\n\r\n// {\r\n//   \"bottleTypeId\": 1,\r\n//   \"quantity\": 20,\r\n//   \"movementType\": \"OUT\",\r\n//   \"createdById\": 2\r\n// }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/bottle-stock",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"bottle-stock"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Stock movement",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/bottle-stock",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"bottle-stock"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Stock movement",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/bottle-stock/{id}",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"bottle-stock",
+										"{id}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Wine Types",
+					"item": [
+						{
+							"name": "Get Wine Types",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/wine-types",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"wine-types"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create Wine Type",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Chardonnay Reserve\",\r\n  \"color\": \"WHITE\",\r\n  \"description\": \"Premium oak-aged Chardonnay\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURL}}/wine-types",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"wine-types"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Wine Type",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Chardonnay Reserve\",\r\n  \"color\": \"WHITE\",\r\n  \"description\": \"Premium oak-aged Chardonnay\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURL}}/wine-types/{id}",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"wine-types",
+										"{id}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Wine type",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/wine-types/{id}",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"wine-types",
+										"{id}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Wine Recipes",
+					"item": [
+						{
+							"name": "Create Wine recipe",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"wineTypeId\": 1,\r\n  \"varietyId\": 2,\r\n  \"requiredKg\": 150\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURL}}/wine-recipes",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"wine-recipes"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Wine recipes",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/wine-recipes",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"wine-recipes"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Wine recipe",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"wineTypeId\": 1,\r\n  \"varietyId\": 2,\r\n  \"requiredKg\": 150\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseURL}}/wine-recipes/{id}",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"wine-recipes",
+										"{id}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Wine recipe",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/wine-recipes/{id}",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"wine-recipes",
+										"{id}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Wine recipe for wine ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseURL}}/wine-recipes/wine-type/10",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"wine-recipes",
+										"wine-type",
+										"10"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Bottled Wines",
+					"item": [
+						{
+							"name": "Get Bottled wines",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/bottled-wines",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"bottled-wines"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Bottled wines by batch ID",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/bottled-wines/batch/{batchId}",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"bottled-wines",
+										"batch",
+										"{batchId}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create Bottles wine",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"batchId\": 56,\r\n  \"bottleTypeId\": 1,\r\n  \"quantityBottles\": 120,\r\n  \"createdById\": 3\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/bottled-wines",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"bottled-wines"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Bottled wine",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/bottled-wines/{id}",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"bottled-wines",
+										"{id}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Notifications",
+					"item": [
+						{
+							"name": "Get Notifications",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/notifications",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"notifications"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Unread notifications",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/notifications/unread",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"notifications",
+										"unread"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create Notification",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"type\": \"GRAPE_LOW\",\r\n  \"resourceType\": \"GRAPE\",\r\n  \"resourceId\": 1,\r\n  \"level\": \"WARNING\",\r\n  \"message\": \"Grape variety Merlot is low\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8080/notifications",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"notifications"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Notification",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/notifications/{id}/read",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"notifications",
+										"{id}",
+										"read"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Notification",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/notifications/{id}",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"notifications",
+										"{id}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Authorization",
+					"item": [
+						{
+							"name": "Get token OPERATOR",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "client_id",
+											"value": "winery-backend",
+											"type": "text"
+										},
+										{
+											"key": "password",
+											"value": "123456",
+											"type": "text"
+										},
+										{
+											"key": "client_secret",
+											"value": "fuPh3Ovva0F9sLWcsMfx5GA98NBi2FDg",
+											"type": "text"
+										},
+										{
+											"key": "grant_type",
+											"value": "password",
+											"type": "text"
+										},
+										{
+											"key": "username",
+											"value": "operator1",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://localhost:8081/realms/winery-realm/protocol/openid-connect/token",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"realms",
+										"winery-realm",
+										"protocol",
+										"openid-connect",
+										"token"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get token ADMIN",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "client_id",
+											"value": "winery-backend",
+											"type": "text"
+										},
+										{
+											"key": "password",
+											"value": "admin",
+											"type": "text"
+										},
+										{
+											"key": "client_secret",
+											"value": "fuPh3Ovva0F9sLWcsMfx5GA98NBi2FDg",
+											"type": "text"
+										},
+										{
+											"key": "grant_type",
+											"value": "password",
+											"type": "text"
+										},
+										{
+											"key": "username",
+											"value": "admin",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://localhost:8081/realms/winery-realm/protocol/openid-connect/token",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"realms",
+										"winery-realm",
+										"protocol",
+										"openid-connect",
+										"token"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get token WAREHOUSE_MANAGER",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "client_id",
+											"value": "winery-backend",
+											"type": "text"
+										},
+										{
+											"key": "password",
+											"value": "123456",
+											"type": "text"
+										},
+										{
+											"key": "client_secret",
+											"value": "fuPh3Ovva0F9sLWcsMfx5GA98NBi2FDg",
+											"type": "text"
+										},
+										{
+											"key": "grant_type",
+											"value": "password",
+											"type": "text"
+										},
+										{
+											"key": "username",
+											"value": "warehouse1",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://localhost:8081/realms/winery-realm/protocol/openid-connect/token",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"realms",
+										"winery-realm",
+										"protocol",
+										"openid-connect",
+										"token"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Reports",
+					"item": [
+						{
+							"name": "Grape reports",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/reports/grapes",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"reports",
+										"grapes"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Bottles report",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/reports/bottles",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"reports",
+										"bottles"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Wine batches",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/reports/batches",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"reports",
+										"batches"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Bottled wine",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8080/reports/bottled-wine",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8080",
+									"path": [
+										"reports",
+										"bottled-wine"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Keycloack",
+					"item": [
+						{
+							"name": "New Request",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/x-www-form-urlencoded",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": [
+										{
+											"key": "grant_type",
+											"value": "authorization_code",
+											"type": "text"
+										},
+										{
+											"key": "client_id",
+											"value": "winery-local-test",
+											"type": "text"
+										},
+										{
+											"key": "code",
+											"value": "9d2e4e09-980d-410f-a42a-11a9c4663a96&iss=http%3A%2F%2Flocalhost%3A8081%2Frealms%2Fwinery-realm&code=1840de68-21d0-4f03-95e3-616d921ce07f.9d2e4e09-980d-410f-a42a-11a9c4663a96.7aa56633-f079-4999-9341-2dfe4d7f21ec",
+											"type": "text"
+										},
+										{
+											"key": "redirect_uri",
+											"value": "http://localhost:8082/callback",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "http://localhost:8081/realms/winery-realm/protocol/openid-connect/token",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8081",
+									"path": [
+										"realms",
+										"winery-realm",
+										"protocol",
+										"openid-connect",
+										"token"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseURL",
+			"value": "",
+			"type": "default"
+		}
+	]
+}
