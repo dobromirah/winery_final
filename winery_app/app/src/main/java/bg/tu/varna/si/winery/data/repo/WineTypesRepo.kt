@@ -7,4 +7,7 @@ class WineTypesRepo(
     private val api: WineTypesApi
 ) {
     suspend fun listAll(): List<WineTypeDto> = api.listAll()
+
+    suspend fun getMaxPlannedLiters(id: Long) = api.getMaxPlannedLiters(id)
+
 }

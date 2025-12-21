@@ -14,5 +14,7 @@ data class WineBatchResponseDto(
     val createdById: Int?,
     val createdByFullName: String?,
 
-    val grapeUsage: List<WineBatchGrapeUsageDto>
+    val grapeUsage: List<WineBatchGrapeUsageDto>,
+    val status: String
+
 )

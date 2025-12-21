@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.dp
 fun HomeScreen(
     roles: Set<String>,
     unreadCount: Int,
+
     onOpenReports: () -> Unit,
     onOpenWarehouseStock: () -> Unit,
     onOpenNotifications: () -> Unit,
@@ -17,15 +18,21 @@ fun HomeScreen(
     onOpenBottleMovement: () -> Unit,
     onOpenBatches: () -> Unit,
 
-//    ,onLogout: () -> Unit
+    // ➕ NEW
+    onOpenGrapeVarieties: () -> Unit,
+    onOpenWineRecipes: () -> Unit
 ) {
     fun hasAny(vararg r: String) = r.any { roles.contains(it) }
 
-    Column(Modifier.fillMaxSize().padding(16.dp)) {
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
         Text("Winery", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(16.dp))
 
-        // Reports: ADMIN / WAREHOUSE_MANAGER / OPERATOR
+        // ---------------- Reports ----------------
         if (hasAny("ADMIN", "WAREHOUSE_MANAGER", "OPERATOR")) {
             Button(onClick = onOpenReports, modifier = Modifier.fillMaxWidth()) {
                 Text("Reports")
@@ -33,7 +40,7 @@ fun HomeScreen(
             Spacer(Modifier.height(10.dp))
         }
 
-        // Warehouse stock: ADMIN / WAREHOUSE_MANAGER / OPERATOR
+        // ---------------- Warehouse stock ----------------
         if (hasAny("ADMIN", "WAREHOUSE_MANAGER", "OPERATOR")) {
             Button(onClick = onOpenWarehouseStock, modifier = Modifier.fillMaxWidth()) {
                 Text("Warehouse Stock")
@@ -41,7 +48,7 @@ fun HomeScreen(
             Spacer(Modifier.height(10.dp))
         }
 
-        // Notifications: ADMIN / WAREHOUSE_MANAGER / OPERATOR
+        // ---------------- Notifications ----------------
         if (hasAny("ADMIN", "WAREHOUSE_MANAGER", "OPERATOR")) {
             Button(onClick = onOpenNotifications, modifier = Modifier.fillMaxWidth()) {
                 Text(if (unreadCount > 0) "Notifications ($unreadCount)" else "Notifications")
@@ -49,18 +56,20 @@ fun HomeScreen(
             Spacer(Modifier.height(10.dp))
         }
 
-        // Movements: grape IN/OUT: WAREHOUSE_MANAGER (и ADMIN за тест)
+        // ---------------- Stock movements ----------------
         if (hasAny("WAREHOUSE_MANAGER", "ADMIN")) {
             Button(onClick = onOpenGrapeMovement, modifier = Modifier.fillMaxWidth()) {
-                Text("Grape Stock IN/OUT")
+                Text("Grape Stock IN / OUT")
             }
             Spacer(Modifier.height(10.dp))
 
             Button(onClick = onOpenBottleMovement, modifier = Modifier.fillMaxWidth()) {
-                Text("Bottle Stock IN/OUT")
+                Text("Bottle Stock IN / OUT")
             }
             Spacer(Modifier.height(10.dp))
         }
+
+        // ---------------- Wine batches ----------------
         if (hasAny("ADMIN", "OPERATOR")) {
             Button(onClick = onOpenBatches, modifier = Modifier.fillMaxWidth()) {
                 Text("Wine Batches")
@@ -68,11 +77,23 @@ fun HomeScreen(
             Spacer(Modifier.height(10.dp))
         }
 
+        Divider(Modifier.padding(vertical = 12.dp))
 
-//        Spacer(Modifier.height(24.dp))
+        // ---------------- Master data ----------------
+        // Grape varieties
+        if (hasAny("ADMIN", "WAREHOUSE_MANAGER")) {
+            Button(onClick = onOpenGrapeVarieties, modifier = Modifier.fillMaxWidth()) {
+                Text("Grape Varieties")
+            }
+            Spacer(Modifier.height(10.dp))
+        }
 
-//        OutlinedButton(onClick = onLogout, modifier = Modifier.fillMaxWidth()) {
-//            Text("Logout")
-//        }
+        // Wine recipes
+        if (hasAny("ADMIN")) {
+            Button(onClick = onOpenWineRecipes, modifier = Modifier.fillMaxWidth()) {
+                Text("Wine Recipes")
+            }
+            Spacer(Modifier.height(10.dp))
+        }
     }
 }

@@ -17,6 +17,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import bg.tu.varna.si.winery.auth.AuthConfig
+import bg.tu.varna.si.winery.auth.AuthEvents
 import bg.tu.varna.si.winery.auth.AuthRetrofit
 import bg.tu.varna.si.winery.auth.AuthSession
 import bg.tu.varna.si.winery.auth.TokenStore
@@ -24,11 +25,15 @@ import bg.tu.varna.si.winery.data.repo.NotificationsRepo
 import bg.tu.varna.si.winery.data.repo.ReportsRepo
 import bg.tu.varna.si.winery.data.repo.WarehouseMovementRepo
 import bg.tu.varna.si.winery.data.repo.WarehouseRepo
+import bg.tu.varna.si.winery.data.repo.WineBatchesRepo
+import bg.tu.varna.si.winery.data.repo.WineTypesRepo
 import bg.tu.varna.si.winery.network.ApiClient
 import bg.tu.varna.si.winery.network.api.BottleApi
 import bg.tu.varna.si.winery.network.api.GrapeApi
 import bg.tu.varna.si.winery.network.api.NotificationsApi
 import bg.tu.varna.si.winery.network.api.ReportsApi
+import bg.tu.varna.si.winery.network.api.WineBatchesApi
+import bg.tu.varna.si.winery.network.api.WineTypesApi
 import bg.tu.varna.si.winery.ui.common.AppScaffold
 import bg.tu.varna.si.winery.ui.home.HomeScreen
 import bg.tu.varna.si.winery.ui.login.LoginScreen
@@ -37,7 +42,24 @@ import bg.tu.varna.si.winery.ui.notifications.NotificationsViewModel
 import bg.tu.varna.si.winery.ui.reports.ReportsScreen
 import bg.tu.varna.si.winery.ui.reports.ReportsViewModel
 import bg.tu.varna.si.winery.ui.session.SessionViewModel
-import bg.tu.varna.si.winery.ui.warehouse.*
+import bg.tu.varna.si.winery.ui.warehouse.BottleMovementScreen
+import bg.tu.varna.si.winery.ui.warehouse.BottleMovementViewModel
+import bg.tu.varna.si.winery.ui.warehouse.GrapeMovementScreen
+import bg.tu.varna.si.winery.ui.warehouse.GrapeMovementViewModel
+import bg.tu.varna.si.winery.ui.warehouse.WarehouseStockScreen
+import bg.tu.varna.si.winery.ui.warehouse.WarehouseStockViewModel
+import bg.tu.varna.si.winery.ui.batches.CreateWineBatchScreen
+import bg.tu.varna.si.winery.ui.batches.CreateWineBatchViewModel
+import bg.tu.varna.si.winery.ui.batches.WineBatchDetailsScreen
+import bg.tu.varna.si.winery.ui.batches.WineBatchDetailsViewModel
+import bg.tu.varna.si.winery.ui.batches.WineBatchesListScreen
+import bg.tu.varna.si.winery.ui.batches.WineBatchesListViewModel
+import bg.tu.varna.si.winery.ui.recipes.GrapeVarietiesPickerViewModel
+import bg.tu.varna.si.winery.ui.recipes.WineRecipeAdminScreen
+import bg.tu.varna.si.winery.ui.recipes.WineRecipeAdminViewModel
+import bg.tu.varna.si.winery.ui.recipes.WineTypesPickerViewModel
+import bg.tu.varna.si.winery.ui.varieties.GrapeVarietiesScreen
+import bg.tu.varna.si.winery.ui.varieties.GrapeVarietiesViewModel
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -53,34 +75,44 @@ class MainActivity : ComponentActivity() {
 
             val retrofit = remember { ApiClient.create(this@MainActivity) }
 
-            // APIs
+            // ---------------- APIs ----------------
             val notificationsApi = remember { retrofit.create(NotificationsApi::class.java) }
             val grapeApi = remember { retrofit.create(GrapeApi::class.java) }
             val bottleApi = remember { retrofit.create(BottleApi::class.java) }
             val reportsApi = remember { retrofit.create(ReportsApi::class.java) }
-            val batchesApi = remember { retrofit.create(bg.tu.varna.si.winery.network.api.WineBatchesApi::class.java) }
-            val wineTypesApi = remember { retrofit.create(bg.tu.varna.si.winery.network.api.WineTypesApi::class.java) }
+            val batchesApi = remember { retrofit.create(WineBatchesApi::class.java) }
+            val wineTypesApi = remember { retrofit.create(WineTypesApi::class.java) }
+            val grapeVarietiesApi = remember { retrofit.create(bg.tu.varna.si.winery.network.api.GrapeVarietiesApi::class.java) }
+            val wineRecipesApi = remember { retrofit.create(bg.tu.varna.si.winery.network.api.WineRecipesApi::class.java) }
 
 
-
-            // Repos
+            // ---------------- Repos ----------------
             val notificationsRepo = remember { NotificationsRepo(notificationsApi) }
             val movementRepo = remember { WarehouseMovementRepo(grapeApi, bottleApi) }
             val warehouseRepo = remember { WarehouseRepo(reportsApi) }
             val reportsRepo = remember { ReportsRepo(reportsApi) }
-            val batchesRepo = remember { bg.tu.varna.si.winery.data.repo.WineBatchesRepo(batchesApi) }
-            val wineTypesRepo = remember { bg.tu.varna.si.winery.data.repo.WineTypesRepo(wineTypesApi) }
+            val batchesRepo = remember { WineBatchesRepo(batchesApi) }
+            val wineTypesRepo = remember { WineTypesRepo(wineTypesApi) }
+            val grapeVarietiesRepo = remember { bg.tu.varna.si.winery.data.repo.GrapeVarietiesRepo(grapeVarietiesApi) }
+            val wineRecipesRepo = remember { bg.tu.varna.si.winery.data.repo.WineRecipesRepo(wineRecipesApi) }
 
 
-            // ViewModels (simple remember)
+            // ---------------- ViewModels ----------------
             val notificationsVm = remember { NotificationsViewModel(notificationsRepo) }
             val grapeVm = remember { GrapeMovementViewModel(movementRepo) }
             val bottleVm = remember { BottleMovementViewModel(movementRepo) }
             val stockVm = remember { WarehouseStockViewModel(warehouseRepo) }
             val reportsVm = remember { ReportsViewModel(reportsRepo) }
-            val batchesListVm = remember { bg.tu.varna.si.winery.ui.batches.WineBatchesListViewModel(batchesRepo) }
-            val batchDetailsVm = remember { bg.tu.varna.si.winery.ui.batches.WineBatchDetailsViewModel(batchesRepo) }
-            val createBatchVm = remember { bg.tu.varna.si.winery.ui.batches.CreateWineBatchViewModel(batchesRepo, wineTypesRepo) }
+            val recipeVm = remember { WineRecipeAdminViewModel(wineRecipesRepo) }
+            val wineTypesPickerVm = remember { WineTypesPickerViewModel(wineTypesRepo) }
+            val varietiesPickerVm = remember { GrapeVarietiesPickerViewModel(grapeVarietiesRepo) }
+            val varietyVm = remember { GrapeVarietiesViewModel(grapeVarietiesRepo) }
+
+
+
+            val batchesListVm = remember { WineBatchesListViewModel(batchesRepo) }
+            val batchDetailsVm = remember { WineBatchDetailsViewModel(batchesRepo) }
+            val createBatchVm = remember { CreateWineBatchViewModel(batchesRepo, wineTypesRepo) }
 
             // Session VM: roles + unreadCount
             val sessionVm = remember { SessionViewModel(this@MainActivity, notificationsRepo) }
@@ -118,7 +150,7 @@ class MainActivity : ComponentActivity() {
 
             // Global forced logout (refresh failed, 401 etc.)
             LaunchedEffect(Unit) {
-                bg.tu.varna.si.winery.auth.AuthEvents.logout.collect {
+                AuthEvents.logout.collect {
                     navController.navigate("login") {
                         popUpTo("home") { inclusive = true }
                         launchSingleTop = true
@@ -129,7 +161,6 @@ class MainActivity : ComponentActivity() {
             NavHost(navController = navController, startDestination = "login") {
 
                 composable("login") {
-                    // LoginScreen не трябва да има Logout, но ти вече си го сложил — ок
                     LoginScreen(onLogout = onLogout)
                 }
 
@@ -151,7 +182,9 @@ class MainActivity : ComponentActivity() {
                             onOpenNotifications = { navController.navigate("notifications") },
                             onOpenGrapeMovement = { navController.navigate("grape-movement") },
                             onOpenBottleMovement = { navController.navigate("bottle-movement") },
-                            onOpenBatches = { navController.navigate("batches") }
+                            onOpenBatches = { navController.navigate("batches") },
+                            onOpenGrapeVarieties = { navController.navigate("grape-varieties") },
+                            onOpenWineRecipes = { navController.navigate("wine-recipes-admin") }
                         )
                     }
                 }
@@ -217,6 +250,38 @@ class MainActivity : ComponentActivity() {
                         BottleMovementScreen(vm = bottleVm, contentPadding = padding)
                     }
                 }
+                composable("wine-recipes-admin") {
+                    AppScaffold(
+                        title = "Wine Recipes",
+                        showBack = true,
+                        onBack = { navController.popBackStack() },
+                        onLogout = onLogout
+                    ) { padding ->
+                        WineRecipeAdminScreen(
+                            recipeVm = recipeVm,
+                            wineTypesVm = wineTypesPickerVm,
+                            grapeVarietiesVm = varietiesPickerVm,
+                            contentPadding = padding
+                        )
+                    }
+                }
+                composable("grape-varieties") {
+                    AppScaffold(
+                        title = "Grape Varieties",
+                        showBack = true,
+                        onBack = { navController.popBackStack() },
+                        onLogout = onLogout
+                    ) { padding ->
+                        GrapeVarietiesScreen(
+                            vm = varietyVm,
+                            contentPadding = padding
+                        )
+                    }
+                }
+
+
+
+                // ---------------- BATCHES LIST ----------------
                 composable("batches") { backStackEntry ->
                     // auto-refresh trigger (set from create screen)
                     LaunchedEffect(Unit) {
@@ -235,16 +300,35 @@ class MainActivity : ComponentActivity() {
                         onBack = { navController.popBackStack() },
                         onLogout = onLogout
                     ) { padding ->
-                        bg.tu.varna.si.winery.ui.batches.WineBatchesListScreen(
+                        WineBatchesListScreen(
                             vm = batchesListVm,
                             contentPadding = padding,
                             canCreate = canCreate,
                             onCreate = { navController.navigate("batch-create") },
-                            onOpenDetails = { id -> navController.navigate("batch/$id") }
+                            onOpenDetails = { batchId -> navController.navigate("batch/$batchId") }
                         )
                     }
                 }
 
+                // ---------------- BATCH DETAILS ----------------
+                composable("batch/{id}") { backStackEntry ->
+                    val id = backStackEntry.arguments?.getString("id")?.toLongOrNull() ?: 0L
+
+                    AppScaffold(
+                        title = "Batch Details",
+                        showBack = true,
+                        onBack = { navController.popBackStack() },
+                        onLogout = onLogout
+                    ) { padding ->
+                        WineBatchDetailsScreen(
+                            id = id,
+                            vm = batchDetailsVm,
+                            contentPadding = padding
+                        )
+                    }
+                }
+
+                // ---------------- CREATE BATCH ----------------
                 composable("batch-create") {
                     AppScaffold(
                         title = "Create Batch",
@@ -252,26 +336,24 @@ class MainActivity : ComponentActivity() {
                         onBack = { navController.popBackStack() },
                         onLogout = onLogout
                     ) { padding ->
-                        bg.tu.varna.si.winery.ui.batches.CreateWineBatchScreen(
+                        CreateWineBatchScreen(
                             vm = createBatchVm,
                             contentPadding = padding,
                             onCreated = { createdId ->
-                                // 1) trigger refresh in list
+                                // 1) trigger refresh in list (if user goes back)
                                 navController.previousBackStackEntry
                                     ?.savedStateHandle
                                     ?.set("batches_refresh", System.currentTimeMillis())
 
-                                // 2) go back to list
-                                navController.popBackStack()
-
-                                // (по избор) можеш и да отвориш детайли:
-                                // navController.navigate("batch/$createdId")
+                                // 2) go to details of the created batch (better UX)
+                                navController.navigate("batch/$createdId") {
+                                    popUpTo("batches") { inclusive = false }
+                                    launchSingleTop = true
+                                }
                             }
                         )
                     }
                 }
-
-
             }
         }
     }

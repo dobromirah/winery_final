@@ -37,4 +37,40 @@ class WineBatchDetailsViewModel(
             }
         }
     }
+    private val _saving = MutableStateFlow(false)
+    val saving: StateFlow<Boolean> = _saving
+
+    fun setProduced(id: Long, producedLiters: Double) {
+        viewModelScope.launch {
+            _saving.value = true
+            _error.value = null
+            try {
+                _item.value = repo.setProduced(id, producedLiters)
+            } catch (e: HttpException) {
+                _error.value = "HTTP ${e.code()} (${e.message()})"
+            } catch (e: Exception) {
+                _error.value = e.message ?: "Unknown error"
+            } finally {
+                _saving.value = false
+            }
+        }
+    }
+
+    fun cancel(id: Long) {
+        viewModelScope.launch {
+            _saving.value = true
+            _error.value = null
+            try {
+                _item.value = repo.cancel(id)
+            } catch (e: HttpException) {
+                _error.value = "HTTP ${e.code()} (${e.message()})"
+            } catch (e: Exception) {
+                _error.value = e.message ?: "Unknown error"
+            } finally {
+                _saving.value = false
+            }
+        }
+    }
+
+
 }
