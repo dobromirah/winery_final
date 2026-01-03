@@ -2,7 +2,7 @@ package bg.tu.varna.si.winery.dto
 
 import com.google.gson.annotations.SerializedName
 
-data class GrapeVarietyDto(
+data class GrapeVarietyResponseDto(
     @SerializedName("id")
     val id: Long,
 

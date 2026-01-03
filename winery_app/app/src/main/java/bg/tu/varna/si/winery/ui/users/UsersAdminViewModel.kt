@@ -1,21 +1,19 @@
-package bg.tu.varna.si.winery.ui.varieties
+package bg.tu.varna.si.winery.ui.users
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.tu.varna.si.winery.data.repo.GrapeVarietiesRepo
-import bg.tu.varna.si.winery.dto.GrapeVarietyCreateDto
-import bg.tu.varna.si.winery.dto.GrapeVarietyResponseDto
+import bg.tu.varna.si.winery.data.repo.UsersRepo
+import bg.tu.varna.si.winery.dto.AppUserResponseDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
-class GrapeVarietiesViewModel(
-    private val repo: GrapeVarietiesRepo
-) : ViewModel() {
+class UsersAdminViewModel(private val repo: UsersRepo) : ViewModel() {
 
-    private val _items = MutableStateFlow<List<GrapeVarietyResponseDto>>(emptyList())
-    val items: StateFlow<List<GrapeVarietyResponseDto>> = _items
+    private val _items = MutableStateFlow<List<AppUserResponseDto>>(emptyList())
+    val items: StateFlow<List<AppUserResponseDto>> = _items
 
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
@@ -33,8 +31,11 @@ class GrapeVarietiesViewModel(
             try {
                 _items.value = repo.listAll()
             } catch (e: HttpException) {
-                _error.value = "HTTP ${e.code()} (${e.message()})"
+                val body = try { e.response()?.errorBody()?.string() } catch (_: Exception) { null }
+                Log.e("USERS", "LIST HTTP ${e.code()} body=$body", e)
+                _error.value = "HTTP ${e.code()} ${body ?: ""}".trim()
             } catch (e: Exception) {
+                Log.e("USERS", "LIST ERR", e)
                 _error.value = e.message ?: "Unknown error"
             } finally {
                 _loading.value = false
@@ -42,23 +43,20 @@ class GrapeVarietiesViewModel(
         }
     }
 
-    fun create(name: String, category: String?, yieldLitersPerKg: Double, criticalMinKg: Double) {
+    fun create(keycloakId: String, fullName: String, role: String, onSuccess: () -> Unit) {
         viewModelScope.launch {
             _saving.value = true
             _error.value = null
             try {
-                repo.create(
-                    GrapeVarietyCreateDto(
-                        name = name.trim(),
-                        category = category?.trim()?.ifBlank { null },
-                        yieldLitersPerKg = yieldLitersPerKg,
-                        criticalMinKg = criticalMinKg
-                    )
-                )
+                repo.create(keycloakId = keycloakId, fullName = fullName, role = role)
                 load()
+                onSuccess()
             } catch (e: HttpException) {
-                _error.value = "HTTP ${e.code()} (${e.message()})"
+                val body = try { e.response()?.errorBody()?.string() } catch (_: Exception) { null }
+                Log.e("USERS", "CREATE HTTP ${e.code()} body=$body", e)
+                _error.value = "HTTP ${e.code()} ${body ?: ""}".trim()
             } catch (e: Exception) {
+                Log.e("USERS", "CREATE ERR", e)
                 _error.value = e.message ?: "Unknown error"
             } finally {
                 _saving.value = false

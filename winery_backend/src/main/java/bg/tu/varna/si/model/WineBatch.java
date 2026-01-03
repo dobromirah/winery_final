@@ -23,4 +23,5 @@ public class WineBatch extends PanacheEntity {
     @Column(nullable = false)
     public WineBatchStatus status = WineBatchStatus.PLANNED;
 
+    public double bottledLiters;
 }

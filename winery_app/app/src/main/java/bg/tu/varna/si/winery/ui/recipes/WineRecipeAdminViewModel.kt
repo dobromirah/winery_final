@@ -63,6 +63,7 @@ class WineRecipeAdminViewModel(
         viewModelScope.launch {
             _saving.value = true
             _error.value = null
+            android.util.Log.e("RECIPES", "DELETE request: recipeRowId=$recipeRowId wineTypeId=$wineTypeId")
             try {
                 repo.delete(recipeRowId)
                 load(wineTypeId)

@@ -17,11 +17,11 @@ fun HomeScreen(
     onOpenGrapeMovement: () -> Unit,
     onOpenBottleMovement: () -> Unit,
     onOpenBatches: () -> Unit,
-
-    // ➕ NEW
     onOpenGrapeVarieties: () -> Unit,
-    onOpenWineRecipes: () -> Unit
-) {
+    onOpenWineRecipes: () -> Unit,
+    onOpenWineTypes: () -> Unit,
+    onOpenUsersAdmin: () -> Unit
+    ) {
     fun hasAny(vararg r: String) = r.any { roles.contains(it) }
 
     Column(
@@ -92,6 +92,21 @@ fun HomeScreen(
         if (hasAny("ADMIN")) {
             Button(onClick = onOpenWineRecipes, modifier = Modifier.fillMaxWidth()) {
                 Text("Wine Recipes")
+            }
+            Spacer(Modifier.height(10.dp))
+        }
+
+        //Wine types
+        if (hasAny("ADMIN")) {
+            Button(onClick = onOpenWineTypes, modifier = Modifier.fillMaxWidth()) {
+                Text("Wine Types")
+            }
+            Spacer(Modifier.height(10.dp))
+        }
+
+        if (hasAny("ADMIN")) {
+            Button(onClick = onOpenUsersAdmin, modifier = Modifier.fillMaxWidth()) {
+                Text("User Administration")
             }
             Spacer(Modifier.height(10.dp))
         }

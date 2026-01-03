@@ -2,10 +2,8 @@ package bg.tu.varna.si.resource;
 
 import bg.tu.varna.si.dto.AppUserCreateDTO;
 import bg.tu.varna.si.dto.AppUserResponseDTO;
-import bg.tu.varna.si.mapper.AppUserMapper;
 import bg.tu.varna.si.model.AppUser;
 import bg.tu.varna.si.repository.AppUserRepository;
-
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -21,89 +19,62 @@ import java.util.stream.Collectors;
 public class AppUserResource {
 
     @Inject
-    AppUserRepository repository;
+    AppUserRepository repo;
 
-    // -------------------------------------------------------
-    // GET ALL USERS
-    // -------------------------------------------------------
+
     @GET
     @RolesAllowed("ADMIN")
     public List<AppUserResponseDTO> listAll() {
-        return repository.listAll()
-                .stream()
-                .map(AppUserMapper::toDTO)
-                .collect(Collectors.toList());
+        return repo.listAll().stream().map(this::toDto).collect(Collectors.toList());
     }
 
-    // -------------------------------------------------------
-    // GET USER BY ID
-    // -------------------------------------------------------
-    @GET
-    @Path("/{id}")
-    @RolesAllowed("ADMIN")
-    public AppUserResponseDTO getById(@PathParam("id") Long id) {
-        AppUser entity = repository.findById(id);
-        if (entity == null) {
-            throw new NotFoundException("User not found");
-        }
-        return AppUserMapper.toDTO(entity);
-    }
-
-    // -------------------------------------------------------
-    // GET USERS BY ROLE
-    // Example: GET /users/role/ADMIN
-    // -------------------------------------------------------
-    @GET
-    @Path("/role/{role}")
-    @RolesAllowed("ADMIN")
-    public List<AppUserResponseDTO> getByRole(@PathParam("role") String role) {
-        return repository.find("role", role)
-                .stream()
-                .map(AppUserMapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    // -------------------------------------------------------
-    // CREATE USER
-    // -------------------------------------------------------
     @POST
     @RolesAllowed("ADMIN")
     @Transactional
     public AppUserResponseDTO create(AppUserCreateDTO dto) {
-        AppUser entity = AppUserMapper.fromCreateDTO(dto);
-        repository.persist(entity);
-        return AppUserMapper.toDTO(entity);
-    }
+        if (dto == null) throw new WebApplicationException("Body required", 400);
+        if (dto.keycloakId == null || dto.keycloakId.isBlank())
+            throw new WebApplicationException("keycloakId is required", 400);
+        if (dto.fullName == null || dto.fullName.isBlank())
+            throw new WebApplicationException("fullName is required", 400);
+        if (dto.role == null || dto.role.isBlank())
+            throw new WebApplicationException("role is required", 400);
 
-    // -------------------------------------------------------
-    // UPDATE USER BY ID
-    // -------------------------------------------------------
-    @PUT
-    @Path("/{id}")
-    @RolesAllowed("ADMIN")
-    @Transactional
-    public AppUserResponseDTO update(@PathParam("id") Long id, AppUserCreateDTO dto) {
-        AppUser entity = repository.findById(id);
-        if (entity == null) {
-            throw new NotFoundException("User not found");
+        String role = dto.role.trim().toUpperCase();
+        if (!role.equals("OPERATOR") && !role.equals("WAREHOUSE_MANAGER") && !role.equals("ADMIN")) {
+            throw new WebApplicationException("Invalid role: " + dto.role, 400);
         }
 
-        entity.keycloakId = dto.keycloakId;
-        entity.fullName = dto.fullName;
-        entity.role = dto.role;
+        // Unique check (ако имаш уникален индекс по keycloakId)
+        AppUser existing = repo.find("keycloakId", dto.keycloakId).firstResult();
+        if (existing != null) {
+            throw new WebApplicationException("User already exists for keycloakId=" + dto.keycloakId, 409);
+        }
 
-        return AppUserMapper.toDTO(entity);
+        AppUser u = new AppUser();
+        u.keycloakId = dto.keycloakId;
+        u.fullName = dto.fullName;
+        u.role = role;
+
+        repo.persist(u);
+        return toDto(u);
     }
 
-    // -------------------------------------------------------
-    // DELETE USER
-    // -------------------------------------------------------
+    private AppUserResponseDTO toDto(AppUser u) {
+        AppUserResponseDTO dto = new AppUserResponseDTO();
+        dto.id = u.id;
+        dto.keycloakId = u.keycloakId;
+        dto.fullName = u.fullName;
+        dto.role = u.role;
+        return dto;
+    }
+
     @DELETE
     @Path("/{id}")
     @RolesAllowed("ADMIN")
     @Transactional
     public void delete(@PathParam("id") Long id) {
-        boolean deleted = repository.deleteById(id);
+        boolean deleted = repo.deleteById(id);
         if (!deleted) {
             throw new NotFoundException("User not found");
         }

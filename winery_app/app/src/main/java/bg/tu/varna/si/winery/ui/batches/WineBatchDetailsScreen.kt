@@ -10,18 +10,30 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import bg.tu.varna.si.winery.dto.WineBatchGrapeUsageDto
 import bg.tu.varna.si.winery.dto.WineBatchResponseDto
+import bg.tu.varna.si.winery.ui.bottling.BottlingPlanDialog
+import bg.tu.varna.si.winery.ui.bottling.BottlingViewModel
 import kotlin.math.abs
 
 @Composable
 fun WineBatchDetailsScreen(
     id: Long,
     vm: WineBatchDetailsViewModel,
+    bottlingVm: BottlingViewModel,
     contentPadding: PaddingValues = PaddingValues()
 ) {
     val item by vm.item.collectAsState()
     val loading by vm.loading.collectAsState()
     val error by vm.error.collectAsState()
     val saving by vm.saving.collectAsState()
+
+    // bottling vm state
+    val plan by bottlingVm.plan.collectAsState()
+    val leftover by bottlingVm.leftover.collectAsState()
+    val bLoading by bottlingVm.loading.collectAsState()
+    val bSaving by bottlingVm.saving.collectAsState()
+    val bError by bottlingVm.error.collectAsState()
+
+    var showBottlingDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(id) { vm.load(id) }
 
@@ -66,6 +78,51 @@ fun WineBatchDetailsScreen(
         } else {
             b.grapeUsage.forEach { u -> UsageRow(u) }
         }
+
+        Spacer(Modifier.height(8.dp))
+        Text("Bottling", style = MaterialTheme.typography.titleMedium)
+
+        if (bError != null) {
+            Text("Bottling error: $bError", color = MaterialTheme.colorScheme.error)
+        }
+
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !bSaving && !bLoading,
+            onClick = {
+                showBottlingDialog = true
+                bottlingVm.loadPlanPrefer750(b.id) // default: priority 750
+            }
+        ) {
+            Text(if (bLoading) "Loading plan..." else "Plan bottling (prefer 750ml)")
+        }
+
+        // try detect 750 typeId from current plan
+        val type750 = plan.firstOrNull { it.volumeMl == 750 }?.bottleTypeId
+
+        BottlingPlanDialog(
+            show = showBottlingDialog,
+            plan = plan,
+            leftoverLiters = leftover,
+            loading = bLoading,
+            saving = bSaving,
+            error = bError,
+            onDismiss = { showBottlingDialog = false },
+            onRecalculatePrefer750 = { bottlingVm.loadPlanPrefer750(b.id) },
+            onOnly750 = {
+                if (type750 != null) bottlingVm.loadPlanOnlyBottleType(b.id, type750)
+                else bottlingVm.loadPlanPrefer750(b.id) // fallback
+            },
+            onSetCount = { bottleTypeId, newCount ->
+                bottlingVm.setCount(bottleTypeId, newCount)
+            },
+            onConfirm = {
+                bottlingVm.apply(b.id) {
+                    showBottlingDialog = false
+                    vm.load(b.id) // refresh details
+                }
+            }
+        )
     }
 }
 
@@ -90,7 +147,6 @@ private fun BatchSummaryCard(
             Modifier.padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Header row: name + status
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -103,13 +159,12 @@ private fun BatchSummaryCard(
             Text("Planned: ${formatNumber(b.plannedLiters)} L")
             Text("Produced: ${formatNumber(b.producedLiters)} L")
             Text("Created: ${b.createdAt}")
-            Text("By: ${b.createdByFullName ?: "-"} (id=${b.createdById ?: "-"})")
+            Text("By: ${b.createdByFullName ?: "-"} ") //(id=${b.createdById ?: "-"})")
 
             if (localError != null) {
                 Text(localError!!, color = MaterialTheme.colorScheme.error)
             }
 
-            // Actions
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Button(
                     enabled = canEditProduced,
@@ -143,7 +198,6 @@ private fun BatchSummaryCard(
         }
     }
 
-    // Produced liters dialog
     if (showProducedDialog) {
         AlertDialog(
             onDismissRequest = { showProducedDialog = false },
@@ -186,14 +240,11 @@ private fun BatchSummaryCard(
         )
     }
 
-    // Cancel confirm dialog
     if (showCancelDialog) {
         AlertDialog(
             onDismissRequest = { showCancelDialog = false },
             title = { Text("Cancel batch?") },
-            text = {
-                Text("This will rollback grape usage back to stock and mark the batch as CANCELLED.")
-            },
+            text = { Text("This will rollback grape usage back to stock and mark the batch as CANCELLED.") },
             confirmButton = {
                 TextButton(
                     enabled = !saving,

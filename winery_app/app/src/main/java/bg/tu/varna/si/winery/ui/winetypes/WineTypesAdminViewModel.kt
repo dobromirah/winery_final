@@ -1,21 +1,21 @@
-package bg.tu.varna.si.winery.ui.varieties
+package bg.tu.varna.si.winery.ui.winetypes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import bg.tu.varna.si.winery.data.repo.GrapeVarietiesRepo
-import bg.tu.varna.si.winery.dto.GrapeVarietyCreateDto
-import bg.tu.varna.si.winery.dto.GrapeVarietyResponseDto
+import bg.tu.varna.si.winery.data.repo.WineTypesRepo
+import bg.tu.varna.si.winery.dto.WineTypeCreateDto
+import bg.tu.varna.si.winery.dto.WineTypeDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 
-class GrapeVarietiesViewModel(
-    private val repo: GrapeVarietiesRepo
+class WineTypesAdminViewModel(
+    private val repo: WineTypesRepo
 ) : ViewModel() {
 
-    private val _items = MutableStateFlow<List<GrapeVarietyResponseDto>>(emptyList())
-    val items: StateFlow<List<GrapeVarietyResponseDto>> = _items
+    private val _items = MutableStateFlow<List<WineTypeDto>>(emptyList())
+    val items: StateFlow<List<WineTypeDto>> = _items
 
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading
@@ -42,17 +42,16 @@ class GrapeVarietiesViewModel(
         }
     }
 
-    fun create(name: String, category: String?, yieldLitersPerKg: Double, criticalMinKg: Double) {
+    fun create(name: String, color: String, description: String?) {
         viewModelScope.launch {
             _saving.value = true
             _error.value = null
             try {
                 repo.create(
-                    GrapeVarietyCreateDto(
+                    WineTypeCreateDto(
                         name = name.trim(),
-                        category = category?.trim()?.ifBlank { null },
-                        yieldLitersPerKg = yieldLitersPerKg,
-                        criticalMinKg = criticalMinKg
+                        color = color.trim(),
+                        description = description?.trim()?.ifBlank { null }
                     )
                 )
                 load()

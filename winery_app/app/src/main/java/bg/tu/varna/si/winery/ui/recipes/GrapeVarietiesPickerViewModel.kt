@@ -3,7 +3,7 @@ package bg.tu.varna.si.winery.ui.recipes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.tu.varna.si.winery.data.repo.GrapeVarietiesRepo
-import bg.tu.varna.si.winery.dto.GrapeVarietyDto
+import bg.tu.varna.si.winery.dto.GrapeVarietyResponseDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -13,8 +13,8 @@ class GrapeVarietiesPickerViewModel(
     private val repo: GrapeVarietiesRepo
 ) : ViewModel() {
 
-    private val _items = MutableStateFlow<List<GrapeVarietyDto>>(emptyList())
-    val items: StateFlow<List<GrapeVarietyDto>> = _items
+    private val _items = MutableStateFlow<List<GrapeVarietyResponseDto>>(emptyList())
+    val items: StateFlow<List<GrapeVarietyResponseDto>> = _items
 
     private val _loading = MutableStateFlow(false)
     val loading: StateFlow<Boolean> = _loading

@@ -8,7 +8,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import bg.tu.varna.si.winery.dto.GrapeVarietyDto
+import bg.tu.varna.si.winery.dto.GrapeVarietyResponseDto
 import bg.tu.varna.si.winery.dto.WineRecipeResponseDto
 import bg.tu.varna.si.winery.dto.WineTypeDto
 import bg.tu.varna.si.winery.ui.varieties.GrapeVarietiesViewModel
@@ -48,7 +48,7 @@ fun WineRecipeAdminScreen(
     var wineTypesExpanded by remember { mutableStateOf(false) }
 
     // Add row form state
-    var selectedVariety by rememberSaveable { mutableStateOf<GrapeVarietyDto?>(null) }
+    var selectedVariety by rememberSaveable { mutableStateOf<GrapeVarietyResponseDto?>(null) }
     var varietiesExpanded by remember { mutableStateOf(false) }
     var kgPerLiterText by rememberSaveable { mutableStateOf("") }
 

@@ -3,9 +3,12 @@ package bg.tu.varna.si.winery.network.api
 import bg.tu.varna.si.winery.auth.AuthRetrofit.api
 import bg.tu.varna.si.winery.dto.WineBatchProduceDto
 import bg.tu.varna.si.winery.dto.WineBatchResponseDto
+import bg.tu.varna.si.winery.dto.WineTypeCreateDto
 import bg.tu.varna.si.winery.dto.WineTypeDto
 import bg.tu.varna.si.winery.dto.WineTypeMaxLitersDto
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface WineTypesApi {
@@ -14,5 +17,8 @@ interface WineTypesApi {
 
     @GET("wine-types/{id}/max-planned-liters")
     suspend fun getMaxPlannedLiters(@Path("id") id: Long): WineTypeMaxLitersDto
+
+    @POST("wine-types")
+    suspend fun create(@Body dto: WineTypeCreateDto): WineTypeDto
 
 }

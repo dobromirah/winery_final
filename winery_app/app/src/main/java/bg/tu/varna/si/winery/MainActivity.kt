@@ -27,6 +27,7 @@ import bg.tu.varna.si.winery.data.repo.WarehouseMovementRepo
 import bg.tu.varna.si.winery.data.repo.WarehouseRepo
 import bg.tu.varna.si.winery.data.repo.WineBatchesRepo
 import bg.tu.varna.si.winery.data.repo.WineTypesRepo
+//import bg.tu.varna.si.winery.data.repo.UsersRepo
 import bg.tu.varna.si.winery.network.ApiClient
 import bg.tu.varna.si.winery.network.api.BottleApi
 import bg.tu.varna.si.winery.network.api.GrapeApi
@@ -60,6 +61,7 @@ import bg.tu.varna.si.winery.ui.recipes.WineRecipeAdminViewModel
 import bg.tu.varna.si.winery.ui.recipes.WineTypesPickerViewModel
 import bg.tu.varna.si.winery.ui.varieties.GrapeVarietiesScreen
 import bg.tu.varna.si.winery.ui.varieties.GrapeVarietiesViewModel
+import bg.tu.varna.si.winery.ui.winetypes.WineTypesAdminViewModel
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -84,6 +86,9 @@ class MainActivity : ComponentActivity() {
             val wineTypesApi = remember { retrofit.create(WineTypesApi::class.java) }
             val grapeVarietiesApi = remember { retrofit.create(bg.tu.varna.si.winery.network.api.GrapeVarietiesApi::class.java) }
             val wineRecipesApi = remember { retrofit.create(bg.tu.varna.si.winery.network.api.WineRecipesApi::class.java) }
+            val bottledWinesApi = remember { retrofit.create(bg.tu.varna.si.winery.network.api.BottledWinesApi::class.java) }
+            val usersApi = remember { retrofit.create(bg.tu.varna.si.winery.network.api.UsersApi::class.java) }
+
 
 
             // ---------------- Repos ----------------
@@ -95,6 +100,9 @@ class MainActivity : ComponentActivity() {
             val wineTypesRepo = remember { WineTypesRepo(wineTypesApi) }
             val grapeVarietiesRepo = remember { bg.tu.varna.si.winery.data.repo.GrapeVarietiesRepo(grapeVarietiesApi) }
             val wineRecipesRepo = remember { bg.tu.varna.si.winery.data.repo.WineRecipesRepo(wineRecipesApi) }
+            val bottledWinesRepo = remember { bg.tu.varna.si.winery.data.repo.BottledWinesRepo(bottledWinesApi) }
+            val usersRepo = remember { bg.tu.varna.si.winery.data.repo.UsersRepo(usersApi) }
+
 
 
             // ---------------- ViewModels ----------------
@@ -107,7 +115,9 @@ class MainActivity : ComponentActivity() {
             val wineTypesPickerVm = remember { WineTypesPickerViewModel(wineTypesRepo) }
             val varietiesPickerVm = remember { GrapeVarietiesPickerViewModel(grapeVarietiesRepo) }
             val varietyVm = remember { GrapeVarietiesViewModel(grapeVarietiesRepo) }
-
+            val wineTypesVm = remember { WineTypesAdminViewModel(wineTypesRepo) }
+            val bottlingVm = remember { bg.tu.varna.si.winery.ui.bottling.BottlingViewModel(bottledWinesRepo) }
+            val usersAdminVm = remember { bg.tu.varna.si.winery.ui.users.UsersAdminViewModel(usersRepo) }
 
 
             val batchesListVm = remember { WineBatchesListViewModel(batchesRepo) }
@@ -184,8 +194,10 @@ class MainActivity : ComponentActivity() {
                             onOpenBottleMovement = { navController.navigate("bottle-movement") },
                             onOpenBatches = { navController.navigate("batches") },
                             onOpenGrapeVarieties = { navController.navigate("grape-varieties") },
-                            onOpenWineRecipes = { navController.navigate("wine-recipes-admin") }
-                        )
+                            onOpenWineRecipes = { navController.navigate("wine-recipes-admin") },
+                            onOpenWineTypes = {navController.navigate("wine-types-admin")},
+                            onOpenUsersAdmin = { navController.navigate("users-admin") }
+                            )
                     }
                 }
 
@@ -279,6 +291,37 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
+                composable("wine-types-admin") {
+                    AppScaffold(
+                        title = "Wine Types",
+                        showBack = true,
+                        onBack = { navController.popBackStack() },
+                        onLogout = onLogout
+                    ) { padding ->
+                        val wineTypesAdminVm = remember { bg.tu.varna.si.winery.ui.winetypes.WineTypesAdminViewModel(wineTypesRepo) }
+                        bg.tu.varna.si.winery.ui.winetypes.WineTypesAdminScreen(
+                            vm = wineTypesAdminVm,
+                            contentPadding = padding
+                        )
+                    }
+                }
+
+                composable("users-admin") {
+                    AppScaffold(
+                        title = "Users",
+                        showBack = true,
+                        onBack = { navController.popBackStack() },
+                        onLogout = onLogout
+                    ) { padding ->
+                        bg.tu.varna.si.winery.ui.users.UsersAdminScreen(
+                            vm = usersAdminVm,
+                            contentPadding = padding
+                        )
+                    }
+                }
+
+
+
 
 
                 // ---------------- BATCHES LIST ----------------
@@ -323,10 +366,12 @@ class MainActivity : ComponentActivity() {
                         WineBatchDetailsScreen(
                             id = id,
                             vm = batchDetailsVm,
+                            bottlingVm = bottlingVm,
                             contentPadding = padding
                         )
                     }
                 }
+
 
                 // ---------------- CREATE BATCH ----------------
                 composable("batch-create") {

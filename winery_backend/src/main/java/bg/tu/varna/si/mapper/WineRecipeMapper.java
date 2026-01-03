@@ -10,7 +10,7 @@ public class WineRecipeMapper {
 
     public static WineRecipeResponseDTO toDTO(WineRecipe entity) {
         WineRecipeResponseDTO dto = new WineRecipeResponseDTO();
-//        dto.id = entity.id;
+        dto.id = entity.id;
 
         dto.wineTypeId = entity.wineType.id;
         dto.wineTypeName = entity.wineType.name;

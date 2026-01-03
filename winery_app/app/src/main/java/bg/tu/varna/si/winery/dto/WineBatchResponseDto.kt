@@ -1,5 +1,7 @@
 package bg.tu.varna.si.winery.dto
 
+import java.time.LocalDateTime
+
 data class WineBatchResponseDto(
     val id: Long,
 

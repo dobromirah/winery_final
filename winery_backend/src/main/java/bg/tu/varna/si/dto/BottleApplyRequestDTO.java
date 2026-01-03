@@ -2,14 +2,12 @@ package bg.tu.varna.si.dto;
 
 import java.util.List;
 
-public class AutoBottleResponseDTO {
+public class BottleApplyRequestDTO {
+    public Long batchId;
     public List<Item> items;
-    public double leftoverLiters;
 
     public static class Item {
         public Long bottleTypeId;
-        public String description;
-        public int volumeMl;
         public int count;
     }
 }
