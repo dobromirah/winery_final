@@ -18,8 +18,6 @@ interface ReportsApi {
     @GET("reports/bottled-wine")
     suspend fun bottledWine(): List<BottledWineReportDto>
 
-    // from/to = LocalDateTime.parse(...) на бекенд
-    // пример: 2025-12-14T10:00:00
     @GET("reports/batches")
     suspend fun batches(
         @Query("from") from: String? = null,

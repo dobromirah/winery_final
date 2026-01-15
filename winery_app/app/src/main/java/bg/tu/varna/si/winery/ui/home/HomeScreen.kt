@@ -12,7 +12,7 @@ fun HomeScreen(
     unreadCount: Int,
 
     onOpenReports: () -> Unit,
-    onOpenWarehouseStock: () -> Unit,
+//    onOpenWarehouseStock: () -> Unit,
     onOpenNotifications: () -> Unit,
     onOpenGrapeMovement: () -> Unit,
     onOpenBottleMovement: () -> Unit,
@@ -32,7 +32,6 @@ fun HomeScreen(
         Text("Winery", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(16.dp))
 
-        // ---------------- Reports ----------------
         if (hasAny("ADMIN", "WAREHOUSE_MANAGER", "OPERATOR")) {
             Button(onClick = onOpenReports, modifier = Modifier.fillMaxWidth()) {
                 Text("Reports")
@@ -40,15 +39,13 @@ fun HomeScreen(
             Spacer(Modifier.height(10.dp))
         }
 
-        // ---------------- Warehouse stock ----------------
-        if (hasAny("ADMIN", "WAREHOUSE_MANAGER", "OPERATOR")) {
-            Button(onClick = onOpenWarehouseStock, modifier = Modifier.fillMaxWidth()) {
-                Text("Warehouse Stock")
-            }
-            Spacer(Modifier.height(10.dp))
-        }
+//        if (hasAny("ADMIN", "WAREHOUSE_MANAGER", "OPERATOR")) {
+//            Button(onClick = onOpenWarehouseStock, modifier = Modifier.fillMaxWidth()) {
+//                Text("Warehouse Stock")
+//            }
+//            Spacer(Modifier.height(10.dp))
+//        }
 
-        // ---------------- Notifications ----------------
         if (hasAny("ADMIN", "WAREHOUSE_MANAGER", "OPERATOR")) {
             Button(onClick = onOpenNotifications, modifier = Modifier.fillMaxWidth()) {
                 Text(if (unreadCount > 0) "Notifications ($unreadCount)" else "Notifications")
@@ -56,21 +53,19 @@ fun HomeScreen(
             Spacer(Modifier.height(10.dp))
         }
 
-        // ---------------- Stock movements ----------------
-        if (hasAny("WAREHOUSE_MANAGER", "ADMIN")) {
+        if (hasAny("WAREHOUSE_MANAGER")) {
             Button(onClick = onOpenGrapeMovement, modifier = Modifier.fillMaxWidth()) {
-                Text("Grape Stock IN / OUT")
+                Text("Grape Stock Movement")
             }
             Spacer(Modifier.height(10.dp))
 
             Button(onClick = onOpenBottleMovement, modifier = Modifier.fillMaxWidth()) {
-                Text("Bottle Stock IN / OUT")
+                Text("Bottle Stock Movement")
             }
             Spacer(Modifier.height(10.dp))
         }
 
-        // ---------------- Wine batches ----------------
-        if (hasAny("ADMIN", "OPERATOR")) {
+        if (hasAny("OPERATOR")) {
             Button(onClick = onOpenBatches, modifier = Modifier.fillMaxWidth()) {
                 Text("Wine Batches")
             }
@@ -79,25 +74,21 @@ fun HomeScreen(
 
         Divider(Modifier.padding(vertical = 12.dp))
 
-        // ---------------- Master data ----------------
-        // Grape varieties
-        if (hasAny("ADMIN", "WAREHOUSE_MANAGER")) {
+        if (hasAny("WAREHOUSE_MANAGER")) {
             Button(onClick = onOpenGrapeVarieties, modifier = Modifier.fillMaxWidth()) {
                 Text("Grape Varieties")
             }
             Spacer(Modifier.height(10.dp))
         }
 
-        // Wine recipes
-        if (hasAny("ADMIN")) {
+        if (hasAny("OPERATOR")) {
             Button(onClick = onOpenWineRecipes, modifier = Modifier.fillMaxWidth()) {
                 Text("Wine Recipes")
             }
             Spacer(Modifier.height(10.dp))
         }
 
-        //Wine types
-        if (hasAny("ADMIN")) {
+        if (hasAny("OPERATOR")) {
             Button(onClick = onOpenWineTypes, modifier = Modifier.fillMaxWidth()) {
                 Text("Wine Types")
             }

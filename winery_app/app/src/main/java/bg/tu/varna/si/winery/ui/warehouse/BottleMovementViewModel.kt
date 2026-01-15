@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import bg.tu.varna.si.winery.data.repo.WarehouseMovementRepo
 import bg.tu.varna.si.winery.dto.BottleStockMovementCreateDto
 import bg.tu.varna.si.winery.dto.BottleTypeDto
+import bg.tu.varna.si.winery.dto.NotificationDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -42,20 +43,29 @@ class BottleMovementViewModel(
         }
     }
 
-    fun submit(bottleTypeId: Long, qty: Int, movementType: String) {
+    fun submit(
+        bottleTypeId: Long,
+        qty: Int,
+        movementType: String,
+        onNotifications: (List<NotificationDto>) -> Unit = {}
+    ) {
         viewModelScope.launch {
             _loading.value = true
             _error.value = null
             _success.value = null
             try {
-                repo.createBottleMovement(
+                val res = repo.createBottleMovement(
                     BottleStockMovementCreateDto(
                         bottleTypeId = bottleTypeId,
                         quantity = qty,
                         movementType = movementType
                     )
                 )
-                _success.value = "✅ Movement saved"
+
+                val notifs = res.notifications.orEmpty()
+                if (notifs.isNotEmpty()) onNotifications(notifs)
+
+                _success.value = "Movement saved"
             } catch (e: HttpException) {
                 _error.value = "HTTP ${e.code()} (${e.message()})"
             } catch (e: Exception) {

@@ -22,9 +22,6 @@ public class NotificationResource {
     @Inject
     NotificationRepository repository;
 
-    // -------------------------------------------------------
-    // GET ALL NOTIFICATIONS
-    // -------------------------------------------------------
     @GET
     @RolesAllowed({"ADMIN", "WAREHOUSE_MANAGER", "OPERATOR"})
     public List<NotificationResponseDTO> listAll() {
@@ -34,9 +31,6 @@ public class NotificationResource {
                 .collect(Collectors.toList());
     }
 
-    // -------------------------------------------------------
-    // GET ONLY UNREAD NOTIFICATIONS
-    // -------------------------------------------------------
     @GET
     @Path("/unread")
     @RolesAllowed({"ADMIN", "WAREHOUSE_MANAGER", "OPERATOR"})
@@ -47,22 +41,16 @@ public class NotificationResource {
                 .collect(Collectors.toList());
     }
 
-    // -------------------------------------------------------
-    // FILTER BY TYPE (GRAPE_LOW, BOTTLE_LOW, SHORTAGE)
-    // -------------------------------------------------------
-    @GET
-    @Path("/type/{type}")
-    @RolesAllowed({"ADMIN", "WAREHOUSE_MANAGER", "OPERATOR"})
-    public List<NotificationResponseDTO> listByType(@PathParam("type") String type) {
-        return repository.list("type", type)
-                .stream()
-                .map(NotificationMapper::toDTO)
-                .collect(Collectors.toList());
-    }
+//    @GET
+//    @Path("/type/{type}")
+//    @RolesAllowed({"ADMIN", "WAREHOUSE_MANAGER", "OPERATOR"})
+//    public List<NotificationResponseDTO> listByType(@PathParam("type") String type) {
+//        return repository.list("type", type)
+//                .stream()
+//                .map(NotificationMapper::toDTO)
+//                .collect(Collectors.toList());
+//    }
 
-    // -------------------------------------------------------
-    // MARK SINGLE NOTIFICATION AS READ
-    // -------------------------------------------------------
     @PUT
     @Path("/{id}/read")
     @RolesAllowed({"ADMIN", "WAREHOUSE_MANAGER", "OPERATOR"})
@@ -79,18 +67,16 @@ public class NotificationResource {
         return NotificationMapper.toDTO(n);
     }
 
-    // -------------------------------------------------------
-    // DELETE NOTIFICATION (ADMIN ONLY)
-    // -------------------------------------------------------
-    @DELETE
-    @Path("/{id}")
-    @RolesAllowed("ADMIN")
-    @Transactional
-    public void delete(@PathParam("id") Long id) {
-        boolean deleted = repository.deleteById(id);
-
-        if (!deleted) {
-            throw new NotFoundException("Notification not found");
-        }
-    }
+//
+//    @DELETE
+//    @Path("/{id}")
+//    @RolesAllowed("ADMIN")
+//    @Transactional
+//    public void delete(@PathParam("id") Long id) {
+//        boolean deleted = repository.deleteById(id);
+//
+//        if (!deleted) {
+//            throw new NotFoundException("Notification not found");
+//        }
+//    }
 }

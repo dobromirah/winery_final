@@ -24,7 +24,6 @@ public class GrapeVarietyResource {
     @Inject
     GrapeVarietyRepository repository;
 
-    // GET all
     @GET
     @RolesAllowed({"ADMIN", "OPERATOR", "WAREHOUSE_MANAGER"})
     public List<GrapeVarietyResponseDTO> listAll() {
@@ -34,9 +33,9 @@ public class GrapeVarietyResource {
                 .collect(Collectors.toList());
     }
 
-    // CREATE
+
     @POST
-    @RolesAllowed({"ADMIN", "WAREHOUSE_MANAGER"})
+    @RolesAllowed({"WAREHOUSE_MANAGER"})
     @Transactional
     public GrapeVarietyResponseDTO create(GrapeVarietyCreateDTO dto) {
         if (dto == null) throw new WebApplicationException("Body is required", 400);
@@ -62,7 +61,7 @@ public class GrapeVarietyResource {
         return GrapeVarietyMapper.toDTO(entity);
     }
 
-    // GET by ID
+
     @GET
     @Path("/{id}")
     @RolesAllowed({"ADMIN", "OPERATOR", "WAREHOUSE_MANAGER"})
@@ -74,29 +73,28 @@ public class GrapeVarietyResource {
         return GrapeVarietyMapper.toDTO(entity);
     }
 
-    // UPDATE by ID
-    @PUT
-    @Path("/{id}")
-    @RolesAllowed("ADMIN")
-    @Transactional
-    public GrapeVarietyResponseDTO update(@PathParam("id") Long id, GrapeVarietyCreateDTO dto) {
-        GrapeVariety entity = repository.findById(id);
-        if (entity == null) {
-            throw new NotFoundException("Grape variety not found");
-        }
 
-        entity.name = dto.name;
-        entity.category = dto.category;
-        entity.yieldLitersPerKg = dto.yieldLitersPerKg;
-        entity.criticalMinKg = dto.criticalMinKg;
+//    @PUT
+//    @Path("/{id}")
+//    @RolesAllowed({"WAREHOUSE_MANAGER"})
+//    @Transactional
+//    public GrapeVarietyResponseDTO update(@PathParam("id") Long id, GrapeVarietyCreateDTO dto) {
+//        GrapeVariety entity = repository.findById(id);
+//        if (entity == null) {
+//            throw new NotFoundException("Grape variety not found");
+//        }
+//
+//        entity.name = dto.name;
+//        entity.category = dto.category;
+//        entity.yieldLitersPerKg = dto.yieldLitersPerKg;
+//        entity.criticalMinKg = dto.criticalMinKg;
+//
+//        return GrapeVarietyMapper.toDTO(entity);
+//    }
 
-        return GrapeVarietyMapper.toDTO(entity);
-    }
-
-    // DELETE by ID
     @DELETE
     @Path("/{id}")
-    @RolesAllowed("ADMIN")
+    @RolesAllowed({"WAREHOUSE_MANAGER"})
     @Transactional
     public void delete(@PathParam("id") Long id) {
         boolean deleted = repository.deleteById(id);

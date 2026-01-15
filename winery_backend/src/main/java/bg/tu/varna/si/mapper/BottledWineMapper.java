@@ -11,14 +11,10 @@ public class BottledWineMapper {
     public static BottledWineResponseDTO toDTO(BottledWine entity) {
         BottledWineResponseDTO dto = new BottledWineResponseDTO();
         dto.id = entity.id;
-
         dto.batchId = entity.batch.id;
-
         dto.bottleTypeId = entity.bottleType.id;
         dto.bottleDescription = entity.bottleType.description;
-
         dto.quantityBottles = entity.quantityBottles;
-
         return dto;
     }
 

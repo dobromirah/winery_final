@@ -11,14 +11,10 @@ public class WineBatchGrapeUsageMapper {
     public static WineBatchGrapeUsageResponseDTO toDTO(WineBatchGrapeUsage entity) {
         WineBatchGrapeUsageResponseDTO dto = new WineBatchGrapeUsageResponseDTO();
         dto.id = entity.id;
-
         dto.batchId = entity.batch.id;
-
         dto.varietyId = entity.variety.id;
         dto.varietyName = entity.variety.name;
-
         dto.quantityKg = entity.quantityKg;
-
         return dto;
     }
 

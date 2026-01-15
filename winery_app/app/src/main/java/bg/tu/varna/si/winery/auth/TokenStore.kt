@@ -22,7 +22,7 @@ object TokenStore {
         refreshToken: String?,
         expiresInSec: Long
     ) {
-        val expiresAt = System.currentTimeMillis() + (expiresInSec * 1000L) - 10_000L // -10s buffer
+        val expiresAt = System.currentTimeMillis() + (expiresInSec * 1000L) - 10_000L // -10s буфер
         context.dataStore.edit {
             it[ACCESS_TOKEN] = accessToken
             if (idToken != null) it[ID_TOKEN] = idToken else it.remove(ID_TOKEN)

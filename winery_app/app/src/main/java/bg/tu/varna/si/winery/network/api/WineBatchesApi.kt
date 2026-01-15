@@ -1,8 +1,8 @@
 package bg.tu.varna.si.winery.network.api
 
 import bg.tu.varna.si.winery.dto.WineBatchCreateDto
-import bg.tu.varna.si.winery.dto.WineBatchResponseDto
 import bg.tu.varna.si.winery.dto.WineBatchProduceDto
+import bg.tu.varna.si.winery.dto.WineBatchResponseDto
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -28,9 +28,4 @@ interface WineBatchesApi {
 
     @POST("wine-batches/{id}/cancel")
     suspend fun cancel(@Path("id") id: Long): WineBatchResponseDto
-
-
-
 }
-
-

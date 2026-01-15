@@ -20,50 +20,42 @@ public class BottleFillingService {
     @Inject
     BottleStockMovementRepository stockRepo;
 
-    /**
-     * Stock-aware plan.
-     * - prioritizes 750ml
-     * - uses remainingLiters (produced - bottled)
-     * - respects allowedBottleTypeIds if provided
-     * - prefers preferredBottleTypeId if provided
-     */
     public PlanResult plan(
             double remainingLiters,
             List<BottleType> allTypes,
             Long preferredBottleTypeId,
             List<Long> allowedBottleTypeIds
     ) {
+        PlanResult out = new PlanResult();
+
         if (remainingLiters <= 0) {
-            PlanResult r = new PlanResult();
-            r.leftoverLiters = 0;
-            r.plannedBottledLiters = 0;
-            return r;
+            out.leftoverLiters = 0;
+            out.plannedBottledLiters = 0;
+            return out;
         }
 
-        // filter allowed
         List<BottleType> types = allTypes;
         if (allowedBottleTypeIds != null && !allowedBottleTypeIds.isEmpty()) {
             Set<Long> allowed = new HashSet<>(allowedBottleTypeIds);
-            types = allTypes.stream().filter(t -> allowed.contains(t.id)).collect(Collectors.toList());
+            types = allTypes.stream()
+                    .filter(t -> t != null && allowed.contains(t.id))
+                    .collect(Collectors.toList());
         }
-
-        // preferred-only mode (ако искаш: ако user е избрал preferred и е подал allowed само него — пак работи)
-        if (preferredBottleTypeId != null) {
-            // не режем до 1 тип, само го приоритизираме (за "само 750" подай allowed=[id])
-        }
-
-        // sort: preferred first, then 750 first, then bigger volumes first
         types = types.stream()
+                .filter(Objects::nonNull)
                 .sorted(Comparator
-                        .comparing((BottleType t) -> preferredBottleTypeId != null && t.id.equals(preferredBottleTypeId) ? 0 : 1)
-                        .thenComparing(t -> t.volumeMl == 750 ? 0 : 1)
+                        .comparing((BottleType t) ->
+                                preferredBottleTypeId != null && t.id != null && t.id.equals(preferredBottleTypeId) ? 0 : 1
+                        )
                         .thenComparing((BottleType t) -> t.volumeMl, Comparator.reverseOrder())
                 )
                 .collect(Collectors.toList());
 
         long remainingMl = Math.round(remainingLiters * 1000.0);
 
-        PlanResult out = new PlanResult();
+        for (BottleType t : types) {
+            out.bottleCounts.put(t, 0);
+        }
 
         for (BottleType t : types) {
             if (remainingMl <= 0) break;

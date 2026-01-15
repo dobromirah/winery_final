@@ -2,6 +2,7 @@ package bg.tu.varna.si.resource;
 
 import bg.tu.varna.si.dto.GrapeStockMovementCreateDTO;
 import bg.tu.varna.si.dto.GrapeStockMovementResponseDTO;
+import bg.tu.varna.si.dto.NotificationResponseDTO;
 import bg.tu.varna.si.mapper.GrapeStockMovementMapper;
 import bg.tu.varna.si.model.*;
 import bg.tu.varna.si.repository.*;
@@ -14,6 +15,7 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,9 +36,6 @@ public class GrapeStockMovementResource {
     @Inject
     NotificationService notificationService;
 
-    // -------------------------------------------------------
-    // GET ALL MOVEMENTS
-    // -------------------------------------------------------
     @GET
     @RolesAllowed({"ADMIN", "WAREHOUSE_MANAGER"})
     public List<GrapeStockMovementResponseDTO> listAll() {
@@ -46,9 +45,6 @@ public class GrapeStockMovementResource {
                 .collect(Collectors.toList());
     }
 
-    // -------------------------------------------------------
-    // GET BY ID
-    // -------------------------------------------------------
     @GET
     @Path("/{id}")
     @RolesAllowed({"ADMIN", "WAREHOUSE_MANAGER"})
@@ -62,14 +58,11 @@ public class GrapeStockMovementResource {
         return GrapeStockMovementMapper.toDTO(entity);
     }
 
-    // -------------------------------------------------------
-    // CREATE STOCK MOVEMENT
-    // -------------------------------------------------------
     @Inject
     CurrentUserService currentUserService;
 
     @POST
-    @RolesAllowed({"WAREHOUSE_MANAGER", "ADMIN"}) // временно за тест
+    @RolesAllowed({"WAREHOUSE_MANAGER"})
     @Transactional
     public GrapeStockMovementResponseDTO create(GrapeStockMovementCreateDTO dto) {
 
@@ -78,7 +71,7 @@ public class GrapeStockMovementResource {
             throw new NotFoundException("Grape variety with ID " + dto.varietyId + " not found");
         }
 
-        AppUser user = currentUserService.getCurrentUser(); // ✅ от JWT
+        AppUser user = currentUserService.getCurrentUser();
 
         GrapeStockMovement entity = new GrapeStockMovement();
         entity.variety = variety;
@@ -89,24 +82,27 @@ public class GrapeStockMovementResource {
         repository.persist(entity);
 
         double totalKg = repository.getTotalKgForVariety(variety.id);
-        notificationService.checkGrapeLevels(variety, totalKg);
+        List<NotificationResponseDTO> pushed = new ArrayList<>();
+        List<Notification> created = notificationService.checkGrapeLevels(variety, totalKg);
+        for (Notification n : created) {
+            pushed.add(toDto(n));
+        }
 
-        return GrapeStockMovementMapper.toDTO(entity);
+        GrapeStockMovementResponseDTO res = GrapeStockMovementMapper.toDTO(entity);
+        res.notifications = pushed;
+        return res;
     }
 
-
-    // -------------------------------------------------------
-    // DELETE MOVEMENT
-    // -------------------------------------------------------
-    @DELETE
-    @Path("/{id}")
-    @RolesAllowed("WAREHOUSE_MANAGER")
-    @Transactional
-    public void delete(@PathParam("id") Long id) {
-        boolean deleted = repository.deleteById(id);
-
-        if (!deleted) {
-            throw new NotFoundException("Grape stock movement not found");
-        }
+    private static NotificationResponseDTO toDto(Notification n) {
+        NotificationResponseDTO d = new NotificationResponseDTO();
+        d.id = n.id;
+        d.type = n.type;
+        d.resourceType = n.resourceType;
+        d.resourceId = n.resourceId;
+        d.level = n.level;
+        d.message = n.message;
+        d.createdAt = n.createdAt != null ? n.createdAt.toString() : null;
+        d.isRead = n.isRead;
+        return d;
     }
 }

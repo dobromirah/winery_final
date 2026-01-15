@@ -1,5 +1,6 @@
 package bg.tu.varna.si.resource;
 
+import bg.tu.varna.si.dto.NotificationResponseDTO;
 import bg.tu.varna.si.dto.WineBatchCreateDTO;
 import bg.tu.varna.si.dto.WineBatchProduceDTO;
 import bg.tu.varna.si.dto.WineBatchResponseDTO;
@@ -8,12 +9,14 @@ import bg.tu.varna.si.model.*;
 import bg.tu.varna.si.repository.*;
 import bg.tu.varna.si.service.CurrentUserService;
 import bg.tu.varna.si.service.NotificationService;
+
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,7 +33,6 @@ public class WineBatchResource {
     @Inject NotificationService notificationService;
     @Inject CurrentUserService currentUserService;
 
-    // ------------------- LIST -------------------
     @GET
     @RolesAllowed({"ADMIN", "OPERATOR", "WAREHOUSE_MANAGER"})
     public List<WineBatchResponseDTO> listAll() {
@@ -45,7 +47,6 @@ public class WineBatchResource {
                 .collect(Collectors.toList());
     }
 
-    // ------------------- GET BY ID -------------------
     @GET
     @RolesAllowed({"ADMIN", "OPERATOR", "WAREHOUSE_MANAGER"})
     @Path("/{id}")
@@ -59,6 +60,7 @@ public class WineBatchResource {
 
         return WineBatchMapper.toDTO(batch, usages);
     }
+
     @PUT
     @Path("/{id}/produce")
     @RolesAllowed("OPERATOR")
@@ -73,18 +75,24 @@ public class WineBatchResource {
 
         WineBatch batch = batchRepository.findById(id);
         if (batch == null) throw new NotFoundException("Batch not found");
-
+        if (dto.producedLiters < batch.producedLiters) {
+            throw new WebApplicationException(
+                    "The latest production must be >= the previous one (" + batch.producedLiters + ").",
+                    400
+            );
+        }
         if (batch.status == WineBatchStatus.CANCELLED) {
             throw new WebApplicationException("Cancelled batch cannot be produced.", 400);
         }
-
+        if (batch.status == WineBatchStatus.BOTTLED || batch.bottledLiters > 0.0) {
+            throw new WebApplicationException("Bottled batch cannot change produced liters.", 400);
+        }
         if (dto.producedLiters > batch.plannedLiters) {
             throw new WebApplicationException("producedLiters cannot exceed plannedLiters", 400);
         }
 
         batch.producedLiters = dto.producedLiters;
 
-        // ✅ Auto status
         if (dto.producedLiters == 0.0) batch.status = WineBatchStatus.PLANNED;
         else if (dto.producedLiters < batch.plannedLiters) batch.status = WineBatchStatus.IN_PRODUCTION;
         else batch.status = WineBatchStatus.COMPLETED;
@@ -104,77 +112,74 @@ public class WineBatchResource {
         if (batch.status == WineBatchStatus.CANCELLED) {
             throw new WebApplicationException("Batch already cancelled.", 400);
         }
+        if (batch.status == WineBatchStatus.BOTTLED || batch.bottledLiters > 0.0) {
+            throw new WebApplicationException("Bottled batch cannot be cancelled.", 400);
+        }
         if (batch.status == WineBatchStatus.COMPLETED) {
             throw new WebApplicationException("Completed batch cannot be cancelled.", 400);
         }
 
         AppUser user = currentUserService.getCurrentUser();
 
-        // 1) Load usages (what we consumed at creation)
         List<WineBatchGrapeUsage> usages = usageRepository.list("batch.id", id);
 
-        // 2) Rollback stock: create IN movements
+        List<NotificationResponseDTO> pushed = new ArrayList<>();
+
         for (WineBatchGrapeUsage u : usages) {
             GrapeStockMovement movement = new GrapeStockMovement();
             movement.variety = u.variety;
-            movement.quantityKg = Math.abs(u.quantityKg); // IN is positive
+            movement.quantityKg = Math.abs(u.quantityKg);
             movement.movementType = "IN";
             movement.createdBy = user;
             grapeStockRepository.persist(movement);
 
             double totalKg = grapeStockRepository.getTotalKgForVariety(u.variety.id);
-            notificationService.checkGrapeLevels(u.variety, totalKg);
+
+            List<Notification> created = notificationService.checkGrapeLevels(u.variety, totalKg);
+            for (Notification n : created) {
+                pushed.add(toDto(n));
+            }
         }
 
-        // 3) Mark status cancelled (and optionally producedLiters=0)
         batch.status = WineBatchStatus.CANCELLED;
         batch.producedLiters = 0;
+        batch.bottledLiters = 0;
 
-        return WineBatchMapper.toDTO(batch, usages);
+        WineBatchResponseDTO res = WineBatchMapper.toDTO(batch, usages);
+        res.notifications = pushed;
+        return res;
     }
 
-
-
-
-    // ------------------- CREATE -------------------
     @POST
     @RolesAllowed("OPERATOR")
     @Transactional
     public WineBatchResponseDTO create(WineBatchCreateDTO dto) {
 
-        // Validate wine type
         WineType wineType = wineTypeRepository.findById(dto.wineTypeId);
         if (wineType == null)
             throw new NotFoundException("WineType with ID " + dto.wineTypeId + " not found.");
 
-        // ✅ Current user from JWT (no createdById from client)
         AppUser user = currentUserService.getCurrentUser();
 
-        // Validate recipe
         List<WineRecipe> recipe = recipeRepository.findByWineTypeId(dto.wineTypeId);
         if (recipe.isEmpty()) {
             throw new WebApplicationException("This wine type has no recipe defined.", 400);
         }
 
-        // Create wine batch (createdBy = JWT user)
         WineBatch batch = WineBatchMapper.fromCreateDTO(dto, wineType, user);
         batchRepository.persist(batch);
 
-        // For each recipe row:
-        // 1) Create WineBatchGrapeUsage
-        // 2) Create GrapeStockMovement OUT
-        // 3) Recalculate total stock and trigger notifications
+        List<NotificationResponseDTO> pushed = new ArrayList<>();
+
         for (WineRecipe r : recipe) {
             double kgNeeded = r.kgPerLiter * dto.plannedLiters;
 
-            // 1) Batch grape usage row
             WineBatchGrapeUsage usage = new WineBatchGrapeUsage();
             usage.batch = batch;
             usage.variety = r.grapeVariety;
             usage.quantityKg = kgNeeded;
             usageRepository.persist(usage);
 
-            // 2) Grape stock movement OUT (negative amount)
             GrapeStockMovement movement = new GrapeStockMovement();
             movement.variety = r.grapeVariety;
             movement.quantityKg = -kgNeeded;
@@ -182,15 +187,32 @@ public class WineBatchResource {
             movement.createdBy = user;
             grapeStockRepository.persist(movement);
 
-            // 3) Recalculate total and check notifications
             double totalKg = grapeStockRepository.getTotalKgForVariety(r.grapeVariety.id);
-            notificationService.checkGrapeLevels(r.grapeVariety, totalKg);
+
+            List<Notification> created = notificationService.checkGrapeLevels(r.grapeVariety, totalKg);
+            for (Notification n : created) {
+                pushed.add(toDto(n));
+            }
         }
 
-        // Return full DTO
         List<WineBatchGrapeUsage> usages =
                 usageRepository.list("batch.id", batch.id);
 
-        return WineBatchMapper.toDTO(batch, usages);
+        WineBatchResponseDTO res = WineBatchMapper.toDTO(batch, usages);
+        res.notifications = pushed;
+        return res;
+    }
+
+    private static NotificationResponseDTO toDto(Notification n) {
+        NotificationResponseDTO d = new NotificationResponseDTO();
+        d.id = n.id;
+        d.type = n.type;
+        d.resourceType = n.resourceType;
+        d.resourceId = n.resourceId;
+        d.level = n.level;
+        d.message = n.message;
+        d.createdAt = n.createdAt != null ? n.createdAt.toString() : null;
+        d.isRead = n.isRead;
+        return d;
     }
 }

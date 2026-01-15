@@ -32,7 +32,7 @@ public class ReportResource {
 
     @Inject BottledWineRepository bottledWineRepo;
 
-    // ---------------- GRAPE STOCK REPORT ----------------
+
     @GET
     @Path("/grapes")
     @RolesAllowed({"ADMIN", "WAREHOUSE_MANAGER", "OPERATOR"})
@@ -55,7 +55,6 @@ public class ReportResource {
                 .collect(Collectors.toList());
     }
 
-    // ---------------- BOTTLE STOCK REPORT ----------------
     @GET
     @Path("/bottles")
     @RolesAllowed({"ADMIN", "WAREHOUSE_MANAGER", "OPERATOR"})
@@ -78,7 +77,6 @@ public class ReportResource {
                 .collect(Collectors.toList());
     }
 
-    // ---------------- WINE BATCH REPORT (with optional range) ----------------
     @GET
     @Path("/batches")
     @RolesAllowed({"ADMIN", "WAREHOUSE_MANAGER", "OPERATOR"})
@@ -92,14 +90,12 @@ public class ReportResource {
         List<WineBatch> batches = batchRepo.listAll();
 
         if (fromDate != null) {
-            // inclusive: createdAt >= fromDate
             batches = batches.stream()
                     .filter(b -> !b.createdAt.isBefore(fromDate))
                     .toList();
         }
 
         if (toDate != null) {
-            // inclusive: createdAt <= toDate
             batches = batches.stream()
                     .filter(b -> !b.createdAt.isAfter(toDate))
                     .toList();
@@ -114,7 +110,6 @@ public class ReportResource {
                 .collect(Collectors.toList());
     }
 
-    // ---------------- BOTTLED WINE REPORT ----------------
     @GET
     @Path("/bottled-wine")
     @RolesAllowed({"ADMIN", "WAREHOUSE_MANAGER", "OPERATOR"})
@@ -139,9 +134,7 @@ public class ReportResource {
                 .collect(Collectors.toList());
     }
 
-    // Accepts:
-    // - "2025-12-14"  -> start of day
-    // - "2025-12-14T10:15:30"
+    // - "2025-12-14"  -> начало на деня
     private LocalDateTime parseFlexibleDateTimeStart(String s) {
         if (s == null || s.isBlank()) return null;
 
@@ -155,14 +148,13 @@ public class ReportResource {
         }
     }
 
-    // Accepts:
-    // - "2025-12-14"  -> end of day
-    // - "2025-12-14T10:15:30"
+
+    // - "2025-12-14"  -> край на деня
     private LocalDateTime parseFlexibleDateTimeEnd(String s) {
         if (s == null || s.isBlank()) return null;
 
         try {
-            if (s.length() == 10) { // yyyy-MM-dd
+            if (s.length() == 10) {
                 return LocalDate.parse(s).atTime(23, 59, 59);
             }
             return LocalDateTime.parse(s, DateTimeFormatter.ISO_LOCAL_DATE_TIME);

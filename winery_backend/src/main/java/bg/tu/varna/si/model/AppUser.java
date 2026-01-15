@@ -6,7 +6,7 @@ import jakarta.persistence.Entity;
 @Entity
 public class AppUser extends PanacheEntity {
 
-    public String keycloakId;   // UUID from Keycloak
-    public String fullName;     // optional, for UI
-    public String role;         // ADMIN / OPERATOR / WAREHOUSE_MANAGER
+    public String keycloakId; // UUID from Keycloak
+    public String fullName;
+    public String role; // ADMIN / OPERATOR / WAREHOUSE_MANAGER
 }

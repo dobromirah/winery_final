@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import bg.tu.varna.si.winery.data.repo.WineBatchesRepo
 import bg.tu.varna.si.winery.data.repo.WineTypesRepo
+import bg.tu.varna.si.winery.dto.NotificationDto
 import bg.tu.varna.si.winery.dto.WineBatchCreateDto
 import bg.tu.varna.si.winery.dto.WineBatchResponseDto
 import bg.tu.varna.si.winery.dto.WineTypeDto
@@ -56,20 +57,18 @@ class CreateWineBatchViewModel(
         }
     }
 
-
     fun loadTypes() {
         viewModelScope.launch {
             _loading.value = true
             _error.value = null
             try {
                 _types.value = wineTypesRepo.listAll()
-                Log.e("WineTypes", "First types: " + _types.value.take(5).joinToString { "${it.name}:${it.id}" })
-
                 Log.d(TAG, "Loaded wine types: ${_types.value.size}")
             } catch (e: HttpException) {
                 val body = safeErrorBody(e)
                 Log.e(TAG, "loadTypes HTTP ${e.code()} body=$body", e)
-                _error.value = "Load types failed: HTTP ${e.code()}${body.ifBlank { "" }.let { if (it.isNotBlank()) " — $it" else "" }}"
+                _error.value =
+                    "Load types failed: HTTP ${e.code()}${body.ifBlank { "" }.let { if (it.isNotBlank()) " — $it" else "" }}"
             } catch (e: Exception) {
                 Log.e(TAG, "loadTypes exception", e)
                 _error.value = e.message ?: "Unknown error"
@@ -79,8 +78,15 @@ class CreateWineBatchViewModel(
         }
     }
 
-    fun create(wineTypeId: Long, plannedLiters: Double) {
-        // ✅ Guard-и за да не пращаш 0 / невалидни стойности
+    /**
+     * Creates batch and immediately forwards backend-generated notifications (low grape stock)
+     * to UI so it can show system notifications.
+     */
+    fun create(
+        wineTypeId: Long,
+        plannedLiters: Double,
+        onNotifications: (List<NotificationDto>) -> Unit = {}
+    ) {
         if (wineTypeId <= 0) {
             _error.value = "Please select a wine type."
             Log.e(TAG, "Blocked create(): wineTypeId=$wineTypeId")
@@ -105,8 +111,15 @@ class CreateWineBatchViewModel(
                     plannedLiters = plannedLiters
                 )
 
-                _created.value = batchesRepo.create(dto)
-                Log.d(TAG, "✅ Created batch id=${_created.value?.id}")
+                val res = batchesRepo.create(dto)
+
+                val notifs = res.notifications.orEmpty()
+                if (notifs.isNotEmpty()) {
+                    onNotifications(notifs)
+                }
+
+                _created.value = res
+                Log.d(TAG, "Created batch id=${res.id} notifications=${notifs.size}")
             } catch (e: HttpException) {
                 val body = safeErrorBody(e)
                 Log.e(TAG, "create HTTP ${e.code()} body=$body", e)

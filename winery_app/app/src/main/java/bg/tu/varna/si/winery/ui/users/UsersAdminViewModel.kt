@@ -63,4 +63,23 @@ class UsersAdminViewModel(private val repo: UsersRepo) : ViewModel() {
             }
         }
     }
+    fun delete(id: Long) {
+        viewModelScope.launch {
+            _saving.value = true
+            _error.value = null
+            try {
+                repo.delete(id)
+                load()
+            } catch (e: HttpException) {
+                val body = try { e.response()?.errorBody()?.string() } catch (_: Exception) { null }
+                Log.e("USERS", "DELETE HTTP ${e.code()} body=$body", e)
+                _error.value = "HTTP ${e.code()} ${body ?: ""}".trim()
+            } catch (e: Exception) {
+                Log.e("USERS", "DELETE ERR", e)
+                _error.value = e.message ?: "Unknown error"
+            } finally {
+                _saving.value = false
+            }
+        }
+    }
 }

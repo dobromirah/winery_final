@@ -1,8 +1,11 @@
 package bg.tu.varna.si.winery.ui.recipes
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
@@ -11,18 +14,7 @@ import androidx.compose.ui.unit.dp
 import bg.tu.varna.si.winery.dto.GrapeVarietyResponseDto
 import bg.tu.varna.si.winery.dto.WineRecipeResponseDto
 import bg.tu.varna.si.winery.dto.WineTypeDto
-import bg.tu.varna.si.winery.ui.varieties.GrapeVarietiesViewModel
-import bg.tu.varna.si.winery.ui.batches.CreateWineBatchViewModel
 
-/**
- * Recipe Admin screen (MVP):
- * - Pick WineType
- * - Shows recipe rows
- * - Add row (Variety + kg/L)
- * - Delete row
- *
- * Roles: typically ADMIN only
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WineRecipeAdminScreen(
@@ -31,14 +23,12 @@ fun WineRecipeAdminScreen(
     grapeVarietiesVm: GrapeVarietiesPickerViewModel,
     contentPadding: PaddingValues = PaddingValues()
 ) {
-    // --- Pickers data ---
     val wineTypes by wineTypesVm.items.collectAsState()
     val wineTypesLoading by wineTypesVm.loading.collectAsState()
 
     val varieties by grapeVarietiesVm.items.collectAsState()
     val varietiesLoading by grapeVarietiesVm.loading.collectAsState()
 
-    // --- Recipe rows ---
     val rows by recipeVm.rows.collectAsState()
     val loading by recipeVm.loading.collectAsState()
     val saving by recipeVm.saving.collectAsState()
@@ -47,7 +37,6 @@ fun WineRecipeAdminScreen(
     var selectedWineType by rememberSaveable { mutableStateOf<WineTypeDto?>(null) }
     var wineTypesExpanded by remember { mutableStateOf(false) }
 
-    // Add row form state
     var selectedVariety by rememberSaveable { mutableStateOf<GrapeVarietyResponseDto?>(null) }
     var varietiesExpanded by remember { mutableStateOf(false) }
     var kgPerLiterText by rememberSaveable { mutableStateOf("") }
@@ -57,20 +46,22 @@ fun WineRecipeAdminScreen(
         grapeVarietiesVm.load()
     }
 
-    // When wine type changes -> load recipe
     LaunchedEffect(selectedWineType?.id) {
         val id = selectedWineType?.id ?: return@LaunchedEffect
         recipeVm.load(id)
-        // reset add-form
         selectedVariety = null
         kgPerLiterText = ""
     }
 
+    val scrollState = rememberScrollState()
+
     Column(
         Modifier
             .fillMaxSize()
+            .verticalScroll(scrollState)
             .padding(contentPadding)
-            .padding(16.dp),
+            .padding(16.dp)
+            .imePadding(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text("Wine recipes", style = MaterialTheme.typography.titleLarge)
@@ -79,7 +70,6 @@ fun WineRecipeAdminScreen(
             Text("Error: $error", color = MaterialTheme.colorScheme.error)
         }
 
-        // --- Wine type picker ---
         Text("1) Select wine type", style = MaterialTheme.typography.titleMedium)
 
         if (wineTypesLoading) {
@@ -117,26 +107,22 @@ fun WineRecipeAdminScreen(
             }
         }
 
-        // If not selected, stop here (UX)
         val wineTypeId = selectedWineType?.id
         if (wineTypeId == null) {
             Text("Pick a wine type to view / edit its recipe.")
             return@Column
         }
 
-        // --- Loading recipe ---
         if (loading) {
             LinearProgressIndicator(Modifier.fillMaxWidth())
         }
 
-        // --- Add row form ---
         Text("2) Add recipe row", style = MaterialTheme.typography.titleMedium)
 
         if (varietiesLoading) {
             LinearProgressIndicator(Modifier.fillMaxWidth())
         }
 
-        // Variety picker
         ExposedDropdownMenuBox(
             expanded = varietiesExpanded,
             onExpandedChange = { varietiesExpanded = !varietiesExpanded }
@@ -185,7 +171,11 @@ fun WineRecipeAdminScreen(
             enabled = canAdd,
             onClick = {
                 val gvId = selectedVariety?.id ?: return@Button
-                recipeVm.addRow(wineTypeId = wineTypeId, grapeVarietyId = gvId, kgPerLiter = kgPerLiter!!)
+                recipeVm.addRow(
+                    wineTypeId = wineTypeId,
+                    grapeVarietyId = gvId,
+                    kgPerLiter = kgPerLiter!!
+                )
                 kgPerLiterText = ""
                 selectedVariety = null
             }
@@ -193,9 +183,8 @@ fun WineRecipeAdminScreen(
             Text(if (saving) "Saving..." else "Add row")
         }
 
-        Divider()
+        HorizontalDivider()
 
-        // --- Recipe list ---
         Text("3) Current recipe", style = MaterialTheme.typography.titleMedium)
 
         if (rows.isEmpty()) {
@@ -211,6 +200,8 @@ fun WineRecipeAdminScreen(
                 }
             }
         }
+
+        Spacer(Modifier.height(12.dp))
     }
 }
 

@@ -11,4 +11,8 @@ class UsersRepo(private val api: UsersApi) {
     suspend fun create(keycloakId: String, fullName: String, role: String): AppUserResponseDto {
         return api.create(AppUserCreateDto(keycloakId = keycloakId, fullName = fullName, role = role))
     }
+
+    suspend fun delete(id: Long) {
+        api.delete(id)
+    }
 }

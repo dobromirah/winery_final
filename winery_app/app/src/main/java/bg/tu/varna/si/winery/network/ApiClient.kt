@@ -10,9 +10,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 
 object ApiClient {
 
-    // IMPORTANT: baseUrl is your QUARKUS backend, not Keycloak
-    // emulator -> your host machine LAN ip OR 10.0.2.2 if backend is on host and exposed
-    private const val BASE_URL = "http://10.0.2.2:8082/"
+    private const val BASE_URL = "http://10.0.2.2:8082/" // локалхост на емулатор
 
     fun create(context: Context): Retrofit {
         val logging = HttpLoggingInterceptor { msg -> Log.d("HTTP", msg) }

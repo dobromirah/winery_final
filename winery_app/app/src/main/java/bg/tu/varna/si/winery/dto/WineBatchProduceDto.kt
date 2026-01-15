@@ -1,5 +1,7 @@
 package bg.tu.varna.si.winery.dto
 
+import com.google.gson.annotations.SerializedName
+
 data class WineBatchProduceDto(
-    val producedLiters: Double
+    @SerializedName("producedLiters") val producedLiters: Double
 )

@@ -33,9 +33,6 @@ public class WineTypeResource {
     GrapeStockMovementRepository grapeStockRepository;
 
 
-    // -------------------------------------------------------
-    // GET ALL WINE TYPES
-    // -------------------------------------------------------
     @GET
     @RolesAllowed({"ADMIN", "OPERATOR", "WAREHOUSE_MANAGER"})
     public List<WineTypeResponseDTO> listAll() {
@@ -45,9 +42,6 @@ public class WineTypeResource {
                 .collect(Collectors.toList());
     }
 
-    // -------------------------------------------------------
-    // GET BY ID
-    // -------------------------------------------------------
     @GET
     @Path("/{id}")
     @RolesAllowed({"ADMIN", "OPERATOR", "WAREHOUSE_MANAGER"})
@@ -59,11 +53,8 @@ public class WineTypeResource {
         return WineTypeMapper.toDTO(entity);
     }
 
-    // -------------------------------------------------------
-    // CREATE
-    // -------------------------------------------------------
     @POST
-    @RolesAllowed("ADMIN")
+    @RolesAllowed({"OPERATOR"})
     @Transactional
     public WineTypeResponseDTO create(WineTypeCreateDTO dto) {
         WineType entity = WineTypeMapper.fromCreateDTO(dto);
@@ -71,39 +62,33 @@ public class WineTypeResource {
         return WineTypeMapper.toDTO(entity);
     }
 
-    // -------------------------------------------------------
-    // UPDATE
-    // -------------------------------------------------------
-    @PUT
-    @Path("/{id}")
-    @RolesAllowed("ADMIN")
-    @Transactional
-    public WineTypeResponseDTO update(@PathParam("id") Long id, WineTypeCreateDTO dto) {
-        WineType entity = repository.findById(id);
-        if (entity == null) {
-            throw new NotFoundException("WineType not found");
-        }
+//    @PUT
+//    @Path("/{id}")
+//    @RolesAllowed({"OPERATOR"})
+//    @Transactional
+//    public WineTypeResponseDTO update(@PathParam("id") Long id, WineTypeCreateDTO dto) {
+//        WineType entity = repository.findById(id);
+//        if (entity == null) {
+//            throw new NotFoundException("WineType not found");
+//        }
+//
+//        entity.name = dto.name;
+//        entity.color = dto.color;
+//        entity.description = dto.description;
+//
+//        return WineTypeMapper.toDTO(entity);
+//    }
 
-        entity.name = dto.name;
-        entity.color = dto.color;
-        entity.description = dto.description;
-
-        return WineTypeMapper.toDTO(entity);
-    }
-
-    // -------------------------------------------------------
-    // DELETE
-    // -------------------------------------------------------
-    @DELETE
-    @Path("/{id}")
-    @RolesAllowed("ADMIN")
-    @Transactional
-    public void delete(@PathParam("id") Long id) {
-        boolean deleted = repository.deleteById(id);
-        if (!deleted) {
-            throw new NotFoundException("WineType not found");
-        }
-    }
+//    @DELETE
+//    @Path("/{id}")
+//    @RolesAllowed({"OPERATOR"})
+//    @Transactional
+//    public void delete(@PathParam("id") Long id) {
+//        boolean deleted = repository.deleteById(id);
+//        if (!deleted) {
+//            throw new NotFoundException("WineType not found");
+//        }
+//    }
 
     @GET
     @Path("/{id}/max-planned-liters")

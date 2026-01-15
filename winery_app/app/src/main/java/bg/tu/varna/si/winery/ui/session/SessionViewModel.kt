@@ -33,7 +33,6 @@ class SessionViewModel(
             try {
                 _unreadCount.value = notificationsRepo.unread().size
             } catch (_: Exception) {
-                // silent (не пречим на Home)
             }
         }
     }

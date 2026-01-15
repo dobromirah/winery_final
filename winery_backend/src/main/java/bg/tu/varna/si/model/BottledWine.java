@@ -8,10 +8,8 @@ public class BottledWine extends PanacheEntity {
 
     @ManyToOne
     public WineBatch batch;
-
     @ManyToOne
     public BottleType bottleType;
-
-    public int quantityBottles; // number of bottles filled
+    public int quantityBottles;
 }
 

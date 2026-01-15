@@ -1,10 +1,13 @@
 package bg.tu.varna.si.winery
 
+import android.Manifest
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -27,7 +30,6 @@ import bg.tu.varna.si.winery.data.repo.WarehouseMovementRepo
 import bg.tu.varna.si.winery.data.repo.WarehouseRepo
 import bg.tu.varna.si.winery.data.repo.WineBatchesRepo
 import bg.tu.varna.si.winery.data.repo.WineTypesRepo
-//import bg.tu.varna.si.winery.data.repo.UsersRepo
 import bg.tu.varna.si.winery.network.ApiClient
 import bg.tu.varna.si.winery.network.api.BottleApi
 import bg.tu.varna.si.winery.network.api.GrapeApi
@@ -35,6 +37,7 @@ import bg.tu.varna.si.winery.network.api.NotificationsApi
 import bg.tu.varna.si.winery.network.api.ReportsApi
 import bg.tu.varna.si.winery.network.api.WineBatchesApi
 import bg.tu.varna.si.winery.network.api.WineTypesApi
+import bg.tu.varna.si.winery.notifications.WineryNotifier
 import bg.tu.varna.si.winery.ui.common.AppScaffold
 import bg.tu.varna.si.winery.ui.home.HomeScreen
 import bg.tu.varna.si.winery.ui.login.LoginScreen
@@ -64,12 +67,24 @@ import bg.tu.varna.si.winery.ui.varieties.GrapeVarietiesViewModel
 import bg.tu.varna.si.winery.ui.winetypes.WineTypesAdminViewModel
 import kotlinx.coroutines.launch
 
+
 class MainActivity : ComponentActivity() {
 
     private var navControllerRef: NavHostController? = null
 
+    private val requestNotificationsPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        WineryNotifier.ensureChannel(this)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestNotificationsPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
 
         setContent {
             val navController = rememberNavController()
@@ -77,7 +92,6 @@ class MainActivity : ComponentActivity() {
 
             val retrofit = remember { ApiClient.create(this@MainActivity) }
 
-            // ---------------- APIs ----------------
             val notificationsApi = remember { retrofit.create(NotificationsApi::class.java) }
             val grapeApi = remember { retrofit.create(GrapeApi::class.java) }
             val bottleApi = remember { retrofit.create(BottleApi::class.java) }
@@ -89,9 +103,6 @@ class MainActivity : ComponentActivity() {
             val bottledWinesApi = remember { retrofit.create(bg.tu.varna.si.winery.network.api.BottledWinesApi::class.java) }
             val usersApi = remember { retrofit.create(bg.tu.varna.si.winery.network.api.UsersApi::class.java) }
 
-
-
-            // ---------------- Repos ----------------
             val notificationsRepo = remember { NotificationsRepo(notificationsApi) }
             val movementRepo = remember { WarehouseMovementRepo(grapeApi, bottleApi) }
             val warehouseRepo = remember { WarehouseRepo(reportsApi) }
@@ -103,9 +114,6 @@ class MainActivity : ComponentActivity() {
             val bottledWinesRepo = remember { bg.tu.varna.si.winery.data.repo.BottledWinesRepo(bottledWinesApi) }
             val usersRepo = remember { bg.tu.varna.si.winery.data.repo.UsersRepo(usersApi) }
 
-
-
-            // ---------------- ViewModels ----------------
             val notificationsVm = remember { NotificationsViewModel(notificationsRepo) }
             val grapeVm = remember { GrapeMovementViewModel(movementRepo) }
             val bottleVm = remember { BottleMovementViewModel(movementRepo) }
@@ -118,13 +126,11 @@ class MainActivity : ComponentActivity() {
             val wineTypesVm = remember { WineTypesAdminViewModel(wineTypesRepo) }
             val bottlingVm = remember { bg.tu.varna.si.winery.ui.bottling.BottlingViewModel(bottledWinesRepo) }
             val usersAdminVm = remember { bg.tu.varna.si.winery.ui.users.UsersAdminViewModel(usersRepo) }
-
-
             val batchesListVm = remember { WineBatchesListViewModel(batchesRepo) }
             val batchDetailsVm = remember { WineBatchDetailsViewModel(batchesRepo) }
             val createBatchVm = remember { CreateWineBatchViewModel(batchesRepo, wineTypesRepo) }
 
-            // Session VM: roles + unreadCount
+
             val sessionVm = remember { SessionViewModel(this@MainActivity, notificationsRepo) }
             val roles by sessionVm.roles.collectAsState()
             val unreadCount by sessionVm.unreadCount.collectAsState()
@@ -135,9 +141,9 @@ class MainActivity : ComponentActivity() {
 
                     // local logout
                     TokenStore.clear(this@MainActivity)
-                    Log.d("AUTH", "✅ Local tokens cleared")
+                    Log.d("AUTH", "Local tokens cleared")
 
-                    // sso logout
+                    // Прекратяване на сесията в Keycloak Single Sign-On logout
                     openKeycloakLogout(idToken)
 
                     navController.navigate("login") {
@@ -148,7 +154,7 @@ class MainActivity : ComponentActivity() {
                 Unit
             }
 
-            // Decide start screen
+            //Начален екран. Ако сме логнати е HOME, ако не сме е Login
             LaunchedEffect(Unit) {
                 val hasToken = !TokenStore.getAccessToken(this@MainActivity).isNullOrBlank()
                 navController.navigate(if (hasToken) "home" else "login") {
@@ -158,7 +164,7 @@ class MainActivity : ComponentActivity() {
                 if (hasToken) sessionVm.refreshAll()
             }
 
-            // Global forced logout (refresh failed, 401 etc.)
+            // Ако ми е изтекъл токена - Login page
             LaunchedEffect(Unit) {
                 AuthEvents.logout.collect {
                     navController.navigate("login") {
@@ -175,7 +181,6 @@ class MainActivity : ComponentActivity() {
                 }
 
                 composable("home") {
-                    // refresh roles + badge on entering home
                     LaunchedEffect(Unit) { sessionVm.refreshAll() }
 
                     AppScaffold(
@@ -188,7 +193,7 @@ class MainActivity : ComponentActivity() {
                             roles = roles,
                             unreadCount = unreadCount,
                             onOpenReports = { navController.navigate("reports") },
-                            onOpenWarehouseStock = { navController.navigate("warehouse-stock") },
+//                            onOpenWarehouseStock = { navController.navigate("warehouse-stock") },
                             onOpenNotifications = { navController.navigate("notifications") },
                             onOpenGrapeMovement = { navController.navigate("grape-movement") },
                             onOpenBottleMovement = { navController.navigate("bottle-movement") },
@@ -212,19 +217,18 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                composable("warehouse-stock") {
-                    AppScaffold(
-                        title = "Warehouse Stock",
-                        showBack = true,
-                        onBack = { navController.popBackStack() },
-                        onLogout = onLogout
-                    ) { padding ->
-                        WarehouseStockScreen(vm = stockVm, contentPadding = padding)
-                    }
-                }
+//                composable("warehouse-stock") {
+//                    AppScaffold(
+//                        title = "Warehouse Stock",
+//                        showBack = true,
+//                        onBack = { navController.popBackStack() },
+//                        onLogout = onLogout
+//                    ) { padding ->
+//                        WarehouseStockScreen(vm = stockVm, contentPadding = padding)
+//                    }
+//                }
 
                 composable("notifications") {
-                    // refresh badge when coming back
                     LaunchedEffect(Unit) { sessionVm.refreshUnreadCount() }
 
                     AppScaffold(
@@ -243,7 +247,7 @@ class MainActivity : ComponentActivity() {
 
                 composable("grape-movement") {
                     AppScaffold(
-                        title = "Grape Stock IN/OUT",
+                        title = "Grape Stock",
                         showBack = true,
                         onBack = { navController.popBackStack() },
                         onLogout = onLogout
@@ -254,7 +258,7 @@ class MainActivity : ComponentActivity() {
 
                 composable("bottle-movement") {
                     AppScaffold(
-                        title = "Bottle Stock IN/OUT",
+                        title = "Bottle Stock",
                         showBack = true,
                         onBack = { navController.popBackStack() },
                         onLogout = onLogout
@@ -298,7 +302,7 @@ class MainActivity : ComponentActivity() {
                         onBack = { navController.popBackStack() },
                         onLogout = onLogout
                     ) { padding ->
-                        val wineTypesAdminVm = remember { bg.tu.varna.si.winery.ui.winetypes.WineTypesAdminViewModel(wineTypesRepo) }
+                        val wineTypesAdminVm = remember { WineTypesAdminViewModel(wineTypesRepo) }
                         bg.tu.varna.si.winery.ui.winetypes.WineTypesAdminScreen(
                             vm = wineTypesAdminVm,
                             contentPadding = padding
@@ -321,12 +325,7 @@ class MainActivity : ComponentActivity() {
                 }
 
 
-
-
-
-                // ---------------- BATCHES LIST ----------------
                 composable("batches") { backStackEntry ->
-                    // auto-refresh trigger (set from create screen)
                     LaunchedEffect(Unit) {
                         backStackEntry.savedStateHandle
                             .getStateFlow("batches_refresh", 0L)
@@ -353,7 +352,6 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-                // ---------------- BATCH DETAILS ----------------
                 composable("batch/{id}") { backStackEntry ->
                     val id = backStackEntry.arguments?.getString("id")?.toLongOrNull() ?: 0L
 
@@ -372,8 +370,6 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
-
-                // ---------------- CREATE BATCH ----------------
                 composable("batch-create") {
                     AppScaffold(
                         title = "Create Batch",
@@ -385,12 +381,10 @@ class MainActivity : ComponentActivity() {
                             vm = createBatchVm,
                             contentPadding = padding,
                             onCreated = { createdId ->
-                                // 1) trigger refresh in list (if user goes back)
                                 navController.previousBackStackEntry
                                     ?.savedStateHandle
                                     ?.set("batches_refresh", System.currentTimeMillis())
 
-                                // 2) go to details of the created batch (better UX)
                                 navController.navigate("batch/$createdId") {
                                     popUpTo("batches") { inclusive = false }
                                     launchSingleTop = true
@@ -429,7 +423,7 @@ class MainActivity : ComponentActivity() {
                     launchSingleTop = true
                 }
             } catch (e: Exception) {
-                Log.e("AUTH", "❌ Token exchange failed", e)
+                Log.e("AUTH", "Token exchange failed", e)
             }
         }
     }

@@ -17,7 +17,7 @@ public class CurrentUserService {
     AppUserRepository userRepository;
 
     public AppUser getCurrentUser() {
-        String keycloakId = jwt.getSubject(); // sub
+        String keycloakId = jwt.getSubject();
 
         AppUser user = userRepository.find("keycloakId", keycloakId).firstResult();
         if (user == null) {

@@ -10,5 +10,5 @@ public class WineRecipe extends PanacheEntity {
     public WineType wineType;
     @ManyToOne
     public GrapeVariety grapeVariety;
-    public double kgPerLiter; // how many kg of this grape for 1 liter of wine
+    public double kgPerLiter; // колко килограма от това грозде са нужни за направата на 1л вино
 }

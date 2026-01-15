@@ -6,6 +6,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @ApplicationScoped
 public class NotificationService {
@@ -13,7 +15,7 @@ public class NotificationService {
     @Inject
     NotificationRepository notificationRepository;
 
-    public void createNotification(
+    public Notification createNotification(
             String type,
             String resourceType,
             Long resourceId,
@@ -30,44 +32,46 @@ public class NotificationService {
         n.isRead = false;
 
         notificationRepository.persist(n);
+        return n;
     }
 
-
-    // ====== GRAPE CHECK ======
-    public void checkGrapeLevels(GrapeVariety variety, double totalKg) {
+    public List<Notification> checkGrapeLevels(GrapeVariety variety, double totalKg) {
+        List<Notification> out = new ArrayList<>();
 
         if (totalKg < 0) {
-            createNotification(
+            out.add(createNotification(
                     "SHORTAGE", "GRAPE", variety.id, "CRITICAL",
                     "Stock of grape " + variety.name + " is NEGATIVE!"
-            );
+            ));
         }
 
         if (totalKg <= variety.criticalMinKg) {
-            createNotification(
-                    "GRAPE_LOW", "GRAPE", variety.id, "WARNING",
+            out.add(createNotification(
+                    "GRAPE IS LOW", "GRAPE", variety.id, "WARNING",
                     "Grape variety " + variety.name + " is below minimum level."
-            );
+            ));
         }
+
+        return out;
     }
 
-
-    // ====== BOTTLE CHECK ======
-    public void checkBottleLevels(BottleType bottleType, int totalQty) {
+    public List<Notification> checkBottleLevels(BottleType bottleType, int totalQty) {
+        List<Notification> out = new ArrayList<>();
 
         if (totalQty < 0) {
-            createNotification(
+            out.add(createNotification(
                     "SHORTAGE", "BOTTLE", bottleType.id, "CRITICAL",
                     "Stock of bottle type " + bottleType.description + " is NEGATIVE!"
-            );
+            ));
         }
 
         if (totalQty <= bottleType.criticalMinQty) {
-            createNotification(
-                    "BOTTLE_LOW", "BOTTLE", bottleType.id, "WARNING",
+            out.add(createNotification(
+                    "BOTTLE IS LOW", "BOTTLE", bottleType.id, "WARNING",
                     "Bottle type " + bottleType.description + " is below minimum stock."
-            );
+            ));
         }
-    }
 
+        return out;
+    }
 }

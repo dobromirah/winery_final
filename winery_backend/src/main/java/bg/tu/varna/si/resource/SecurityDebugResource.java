@@ -10,6 +10,8 @@ import jakarta.ws.rs.core.MediaType;
 
 import java.util.Map;
 
+//Проверявам ролята на логнатия потребител
+
 @Path("/debug/security")
 @Produces(MediaType.APPLICATION_JSON)
 public class SecurityDebugResource {
@@ -18,7 +20,7 @@ public class SecurityDebugResource {
     SecurityIdentity identity;
 
     @GET
-    @Authenticated
+    @Authenticated // само логнати потребители
     public Map<String, Object> debug() {
         return Map.of(
                 "principal", identity.getPrincipal() != null ? identity.getPrincipal().getName() : null,

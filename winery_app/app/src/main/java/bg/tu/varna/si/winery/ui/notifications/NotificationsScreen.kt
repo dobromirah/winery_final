@@ -42,7 +42,7 @@ fun NotificationsScreen(
         }
 
         if (items.isEmpty() && !loading) {
-            Text("No unread notifications ✅")
+            Text("No unread notifications")
             return@Column
         }
 

@@ -2,6 +2,7 @@ package bg.tu.varna.si.resource;
 
 import bg.tu.varna.si.dto.BottleStockMovementCreateDTO;
 import bg.tu.varna.si.dto.BottleStockMovementResponseDTO;
+import bg.tu.varna.si.dto.NotificationResponseDTO;
 import bg.tu.varna.si.mapper.BottleStockMovementMapper;
 import bg.tu.varna.si.model.*;
 import bg.tu.varna.si.repository.*;
@@ -14,6 +15,7 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,9 +36,9 @@ public class BottleStockMovementResource {
     @Inject
     NotificationService notificationService;
 
-    // -------------------------------------------------------
-    // GET ALL MOVEMENTS
-    // -------------------------------------------------------
+    @Inject
+    CurrentUserService currentUserService;
+
     @GET
     @RolesAllowed({"ADMIN", "WAREHOUSE_MANAGER"})
     public List<BottleStockMovementResponseDTO> listAll() {
@@ -46,31 +48,8 @@ public class BottleStockMovementResource {
                 .collect(Collectors.toList());
     }
 
-    // -------------------------------------------------------
-    // GET BY ID
-    // -------------------------------------------------------
-    @GET
-    @Path("/{id}")
-    @RolesAllowed({"ADMIN", "WAREHOUSE_MANAGER"})
-    public BottleStockMovementResponseDTO getById(@PathParam("id") Long id) {
-        BottleStockMovement entity = repository.findById(id);
-
-        if (entity == null) {
-            throw new NotFoundException("Bottle stock movement not found");
-        }
-
-        return BottleStockMovementMapper.toDTO(entity);
-    }
-
-    // -------------------------------------------------------
-    // CREATE STOCK MOVEMENT
-    // -------------------------------------------------------
-
-    @Inject
-    CurrentUserService currentUserService;
-
     @POST
-    @RolesAllowed({"WAREHOUSE_MANAGER", "ADMIN"}) // временно за тест
+    @RolesAllowed({"WAREHOUSE_MANAGER"})
     @Transactional
     public BottleStockMovementResponseDTO create(BottleStockMovementCreateDTO dto) {
 
@@ -78,7 +57,7 @@ public class BottleStockMovementResource {
         if (bottleType == null)
             throw new NotFoundException("BottleType with ID " + dto.bottleTypeId + " not found");
 
-        AppUser user = currentUserService.getCurrentUser(); // ✅ от JWT
+        AppUser user = currentUserService.getCurrentUser(); // от JWT
 
         BottleStockMovement movement =
                 BottleStockMovementMapper.fromCreateDTO(dto, bottleType, user);
@@ -86,15 +65,18 @@ public class BottleStockMovementResource {
         repository.persist(movement);
 
         int totalQty = repository.getTotalQuantityForBottle(bottleType.id);
-        notificationService.checkBottleLevels(bottleType, totalQty);
 
-        return BottleStockMovementMapper.toDTO(movement);
+        List<NotificationResponseDTO> pushed = new ArrayList<>();
+        List<Notification> created = notificationService.checkBottleLevels(bottleType, totalQty);
+        for (Notification n : created) {
+            pushed.add(toDto(n));
+        }
+
+        BottleStockMovementResponseDTO res = BottleStockMovementMapper.toDTO(movement);
+        res.notifications = pushed;
+        return res;
     }
 
-
-    // -------------------------------------------------------
-    // DELETE MOVEMENT
-    // -------------------------------------------------------
     @DELETE
     @Path("/{id}")
     @RolesAllowed("WAREHOUSE_MANAGER")
@@ -105,5 +87,18 @@ public class BottleStockMovementResource {
         if (!deleted) {
             throw new NotFoundException("Bottle stock movement not found");
         }
+    }
+
+    private static NotificationResponseDTO toDto(Notification n) {
+        NotificationResponseDTO d = new NotificationResponseDTO();
+        d.id = n.id;
+        d.type = n.type;
+        d.resourceType = n.resourceType;
+        d.resourceId = n.resourceId;
+        d.level = n.level;
+        d.message = n.message;
+        d.createdAt = n.createdAt != null ? n.createdAt.toString() : null;
+        d.isRead = n.isRead;
+        return d;
     }
 }

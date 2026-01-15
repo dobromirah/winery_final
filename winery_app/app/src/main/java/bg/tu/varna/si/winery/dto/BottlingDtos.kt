@@ -36,5 +36,6 @@ data class BottleApplyResponseDto(
     @SerializedName("bottledNowLiters") val bottledNowLiters: Double,
     @SerializedName("totalBottledLiters") val totalBottledLiters: Double,
     @SerializedName("leftoverLiters") val leftoverLiters: Double,
-    @SerializedName("items") val items: List<BottlePlanItemDto>
+    @SerializedName("items") val items: List<BottlePlanItemDto>,
+    @SerializedName("notifications") val notifications: List<NotificationDto>?
 )

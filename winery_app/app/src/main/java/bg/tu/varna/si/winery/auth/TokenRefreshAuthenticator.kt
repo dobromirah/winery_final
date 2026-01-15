@@ -33,7 +33,7 @@ class TokenRefreshAuthenticator(
                     context = context,
                     accessToken = newTokens.accessToken,
                     idToken = newTokens.idToken,
-                    refreshToken = newTokens.refreshToken ?: refreshToken, // понякога KC не връща нов refresh
+                    refreshToken = newTokens.refreshToken ?: refreshToken, // понякога не връща нов refresh
                     expiresInSec = newTokens.expiresIn
                 )
             }

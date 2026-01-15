@@ -3,6 +3,4 @@ package bg.tu.varna.si.dto;
 public class WineBatchCreateDTO {
     public Long wineTypeId;
     public double plannedLiters;
-
-    // createdById – идва от JWT
 }

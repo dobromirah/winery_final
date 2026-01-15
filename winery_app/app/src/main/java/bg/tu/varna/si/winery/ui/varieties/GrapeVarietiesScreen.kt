@@ -51,7 +51,7 @@ fun GrapeVarietiesScreen(
                 OutlinedTextField(
                     value = category,
                     onValueChange = { category = it },
-                    label = { Text("Category (optional)") },
+                    label = { Text("Category") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )

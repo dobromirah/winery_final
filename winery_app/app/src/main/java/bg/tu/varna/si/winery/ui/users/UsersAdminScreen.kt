@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import bg.tu.varna.si.winery.dto.AppUserResponseDto
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,6 +27,8 @@ fun UsersAdminScreen(
     val roles = listOf("OPERATOR", "WAREHOUSE_MANAGER")
     var selectedRole by rememberSaveable { mutableStateOf(roles.first()) }
     var roleExpanded by remember { mutableStateOf(false) }
+    var deleteTarget by remember { mutableStateOf<AppUserResponseDto?>(null) }
+
 
     LaunchedEffect(Unit) { vm.load() }
 
@@ -109,6 +112,27 @@ fun UsersAdminScreen(
                     Text(if (saving) "Saving..." else "Create user")
                 }
             }
+            if (deleteTarget != null) {
+                val u = deleteTarget!!
+                AlertDialog(
+                    onDismissRequest = { deleteTarget = null },
+                    title = { Text("Delete user?") },
+                    text = { Text("Are you sure you want to delete '${u.fullName}' (${u.role})?") },
+                    confirmButton = {
+                        Button(
+                            enabled = !saving,
+                            onClick = {
+                                vm.delete(u.id)
+                                deleteTarget = null
+                            }
+                        ) { Text("Delete") }
+                    },
+                    dismissButton = {
+                        OutlinedButton(onClick = { deleteTarget = null }) { Text("Cancel") }
+                    }
+                )
+            }
+
         }
 
         Text("All users", style = MaterialTheme.typography.titleMedium)
@@ -116,10 +140,27 @@ fun UsersAdminScreen(
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(items) { u ->
                 Card(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Column(
+                        Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
                         Text(u.fullName, style = MaterialTheme.typography.titleSmall)
                         Text("Role: ${u.role}")
                         Text("KeycloakId: ${u.keycloakId}", style = MaterialTheme.typography.bodySmall)
+
+                        Spacer(Modifier.height(6.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            OutlinedButton(
+                                enabled = !saving,
+                                onClick = { deleteTarget = u }
+                            ) {
+                                Text("Delete")
+                            }
+                        }
                     }
                 }
             }

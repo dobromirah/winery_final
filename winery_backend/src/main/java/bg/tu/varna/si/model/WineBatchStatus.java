@@ -4,5 +4,6 @@ public enum WineBatchStatus {
     PLANNED,
     IN_PRODUCTION,
     COMPLETED,
+    BOTTLED,
     CANCELLED
 }

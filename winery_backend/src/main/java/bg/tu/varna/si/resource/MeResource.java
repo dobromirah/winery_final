@@ -13,6 +13,9 @@ import jakarta.ws.rs.core.MediaType;
 
 import java.util.Map;
 
+//REST endpoint в Java (JAX-RS), който връща информация за текущо логнатия потребител, извлечена от JWT токена (Keycloak)
+//проверка дали този потребител съществува в базата.
+
 @Path("/me")
 @Produces(MediaType.APPLICATION_JSON)
 public class MeResource {
@@ -23,9 +26,9 @@ public class MeResource {
     @GET
     @PermitAll
     public Map<String, Object> me() {
-        String sub = jwt.getSubject();
+        String sub = jwt.getSubject(); // уникален идентификатор на потребителя - keycloakId
 
-        AppUser user = userRepository.find("keycloakId", sub).firstResult();
+        AppUser user = userRepository.find("keycloakId", sub).firstResult(); // проверка дали го имам в базата
 
         return Map.of(
                 "sub", sub,

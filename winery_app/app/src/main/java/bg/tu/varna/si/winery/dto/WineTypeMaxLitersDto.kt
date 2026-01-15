@@ -1,16 +1,18 @@
 package bg.tu.varna.si.winery.dto
 
+import com.google.gson.annotations.SerializedName
+
 data class WineTypeMaxLitersDto(
-    val wineTypeId: Long,
-    val maxLiters: Double,
-    val limitingVarietyName: String?,
-    val limits: List<VarietyLimitDto> = emptyList()
+    @SerializedName("wineTypeId") val wineTypeId: Long,
+    @SerializedName("maxLiters") val maxLiters: Double,
+    @SerializedName("limitingVarietyName") val limitingVarietyName: String?,
+    @SerializedName("limits") val limits: List<VarietyLimitDto> = emptyList()
 ) {
     data class VarietyLimitDto(
-        val varietyId: Long,
-        val varietyName: String,
-        val availableKg: Double,
-        val kgPerLiter: Double,
-        val maxLitersForVariety: Double
+        @SerializedName("varietyId") val varietyId: Long,
+        @SerializedName("varietyName") val varietyName: String,
+        @SerializedName("availableKg") val availableKg: Double,
+        @SerializedName("kgPerLiter") val kgPerLiter: Double,
+        @SerializedName("maxLitersForVariety") val maxLitersForVariety: Double
     )
 }

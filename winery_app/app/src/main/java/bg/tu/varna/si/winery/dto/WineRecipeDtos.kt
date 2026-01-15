@@ -1,16 +1,18 @@
 package bg.tu.varna.si.winery.dto
 
+import com.google.gson.annotations.SerializedName
+
 data class WineRecipeCreateDto(
-    val wineTypeId: Long,
-    val grapeVarietyId: Long,
-    val kgPerLiter: Double
+    @SerializedName("wineTypeId") val wineTypeId: Long,
+    @SerializedName("grapeVarietyId") val grapeVarietyId: Long,
+    @SerializedName("kgPerLiter") val kgPerLiter: Double
 )
 
 data class WineRecipeResponseDto(
-    val id: Long,
-    val wineTypeId: Long,
-    val wineTypeName: String,
-    val grapeVarietyId: Long,
-    val grapeVarietyName: String,
-    val kgPerLiter: Double
+    @SerializedName("id") val id: Long,
+    @SerializedName("wineTypeId") val wineTypeId: Long,
+    @SerializedName("wineTypeName") val wineTypeName: String,
+    @SerializedName("grapeVarietyId") val grapeVarietyId: Long,
+    @SerializedName("grapeVarietyName") val grapeVarietyName: String,
+    @SerializedName("kgPerLiter") val kgPerLiter: Double
 )

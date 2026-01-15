@@ -1,9 +1,6 @@
 package bg.tu.varna.si.winery.data.repo
 
-import bg.tu.varna.si.winery.dto.BottleStockMovementCreateDto
-import bg.tu.varna.si.winery.dto.BottleTypeDto
-import bg.tu.varna.si.winery.dto.GrapeStockMovementCreateDto
-import bg.tu.varna.si.winery.dto.GrapeVarietyDto
+import bg.tu.varna.si.winery.dto.*
 import bg.tu.varna.si.winery.network.api.BottleApi
 import bg.tu.varna.si.winery.network.api.GrapeApi
 
@@ -14,6 +11,9 @@ class WarehouseMovementRepo(
     suspend fun grapeVarieties(): List<GrapeVarietyDto> = grapeApi.varieties()
     suspend fun bottleTypes(): List<BottleTypeDto> = bottleApi.bottleTypes()
 
-    suspend fun createGrapeMovement(dto: GrapeStockMovementCreateDto) = grapeApi.createMovement(dto)
-    suspend fun createBottleMovement(dto: BottleStockMovementCreateDto) = bottleApi.createMovement(dto)
+    suspend fun createGrapeMovement(dto: GrapeStockMovementCreateDto): GrapeStockMovementResponseDto =
+        grapeApi.createMovement(dto)
+
+    suspend fun createBottleMovement(dto: BottleStockMovementCreateDto): BottleStockMovementResponseDto =
+        bottleApi.createMovement(dto)
 }

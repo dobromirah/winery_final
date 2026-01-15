@@ -32,12 +32,10 @@ fun ReportsScreen(
     var tabIndex by remember { mutableStateOf(0) }
     val tabs = listOf("Grapes", "Bottles", "Bottled wine", "Batches")
 
-    // DATE ONLY filter: yyyy-MM-dd
     val dateFmt = remember { DateTimeFormatter.ISO_LOCAL_DATE }
     var fromDateText by remember { mutableStateOf("") }
     var toDateText by remember { mutableStateOf("") }
 
-    // Load per-tab
     LaunchedEffect(tabIndex) {
         when (tabIndex) {
             0, 1 -> vm.loadAllStock()
@@ -47,6 +45,11 @@ fun ReportsScreen(
                 to = toDateText.takeIf { it.isNotBlank() }
             )
         }
+    }
+
+    // Да не се виждат канселираните в репорти
+    val visibleBatches = remember(batches) {
+        batches.filter { it.status.toString() != "CANCELLED" }
     }
 
     Column(
@@ -78,7 +81,7 @@ fun ReportsScreen(
             1 -> BottlesTab(bottles)
             2 -> BottledWineTab(bottledWine)
             3 -> BatchesTab(
-                items = batches,
+                items = visibleBatches,
                 fromText = fromDateText,
                 toText = toDateText,
                 onFromChange = { fromDateText = it },
@@ -91,7 +94,7 @@ fun ReportsScreen(
                 },
                 onLast7Days = {
                     val to = LocalDate.now()
-                    val from = to.minusDays(6) // inclusive 7 days
+                    val from = to.minusDays(6)
                     val fromS = from.format(dateFmt)
                     val toS = to.format(dateFmt)
                     fromDateText = fromS
@@ -108,8 +111,6 @@ fun ReportsScreen(
                     val toOk = toDateText.isBlank() || isValidDate(toDateText)
 
                     if (!fromOk || !toOk) {
-                        // просто показваме грешка през vm.error? няма setter.
-                        // затова правим "safe": ако е невалидно - не пращаме.
                         return@BatchesTab
                     }
 
@@ -122,8 +123,6 @@ fun ReportsScreen(
         }
     }
 }
-
-/* ---------------- TAB: GRAPES ---------------- */
 
 @Composable
 private fun GrapesTab(items: List<GrapeStockReportDto>) {
@@ -154,8 +153,6 @@ private fun GrapesTab(items: List<GrapeStockReportDto>) {
     }
 }
 
-/* ---------------- TAB: BOTTLES ---------------- */
-
 @Composable
 private fun BottlesTab(items: List<BottleStockReportDto>) {
     if (items.isEmpty()) {
@@ -185,7 +182,6 @@ private fun BottlesTab(items: List<BottleStockReportDto>) {
     }
 }
 
-/* ---------------- TAB: BOTTLED WINE ---------------- */
 
 @Composable
 private fun BottledWineTab(items: List<BottledWineReportDto>) {
@@ -214,8 +210,6 @@ private fun BottledWineTab(items: List<BottledWineReportDto>) {
         }
     }
 }
-
-/* ---------------- TAB: BATCHES (DATE ONLY) ---------------- */
 
 @Composable
 private fun BatchesTab(
@@ -284,7 +278,7 @@ private fun BatchesTab(
                         Spacer(Modifier.height(6.dp))
                         Text("Planned: ${b.plannedLiters} L  |  Produced: ${b.producedLiters} L")
                         Text("Created at: ${b.createdAt}")
-                        Text("Created by: ${b.createdByFullName ?: "-"} (id=${b.createdById ?: "-"})")
+                        Text("Created by: ${b.createdByFullName ?: "-"}")
 
                         if (b.grapeUsage.isNotEmpty()) {
                             Spacer(Modifier.height(8.dp))

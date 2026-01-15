@@ -7,6 +7,7 @@ import bg.tu.varna.si.winery.data.repo.BottledWinesRepo
 import bg.tu.varna.si.winery.dto.BottleApplyRequestDto
 import bg.tu.varna.si.winery.dto.BottlePlanItemDto
 import bg.tu.varna.si.winery.dto.AutoBottlePlanResponseDto
+import bg.tu.varna.si.winery.dto.NotificationDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -29,16 +30,19 @@ class BottlingViewModel(private val repo: BottledWinesRepo) : ViewModel() {
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
-    // preference: 750ml priority (backend also does it)
-    fun loadPlanPrefer750(batchId: Long) {
+    fun loadPlanDefault(batchId: Long) {
         loadPlan(batchId = batchId, preferredBottleTypeId = null, allowedBottleTypeIds = null)
+    }
+
+    fun loadPlanPrefer(batchId: Long, preferredBottleTypeId: Long) {
+        loadPlan(batchId = batchId, preferredBottleTypeId = preferredBottleTypeId, allowedBottleTypeIds = null)
     }
 
     fun loadPlanOnlyBottleType(batchId: Long, bottleTypeId: Long) {
         loadPlan(batchId = batchId, preferredBottleTypeId = bottleTypeId, allowedBottleTypeIds = listOf(bottleTypeId))
     }
 
-    fun loadPlan(
+    private fun loadPlan(
         batchId: Long,
         preferredBottleTypeId: Long? = null,
         allowedBottleTypeIds: List<Long>? = null
@@ -47,7 +51,9 @@ class BottlingViewModel(private val repo: BottledWinesRepo) : ViewModel() {
             _loading.value = true
             _error.value = null
             try {
-                val res: AutoBottlePlanResponseDto = repo.plan(batchId, preferredBottleTypeId, allowedBottleTypeIds)
+                val res: AutoBottlePlanResponseDto =
+                    repo.plan(batchId, preferredBottleTypeId, allowedBottleTypeIds)
+
                 _plan.value = res.items
                 _leftover.value = res.leftoverLiters
             } catch (e: HttpException) {
@@ -70,7 +76,11 @@ class BottlingViewModel(private val repo: BottledWinesRepo) : ViewModel() {
         }
     }
 
-    fun apply(batchId: Long, onSuccess: () -> Unit) {
+    fun apply(
+        batchId: Long,
+        onNotifications: (List<NotificationDto>) -> Unit,
+        onSuccess: () -> Unit
+    ) {
         viewModelScope.launch {
             _saving.value = true
             _error.value = null
@@ -79,7 +89,13 @@ class BottlingViewModel(private val repo: BottledWinesRepo) : ViewModel() {
                     .filter { it.count > 0 }
                     .map { BottleApplyRequestDto.Item(bottleTypeId = it.bottleTypeId, count = it.count) }
 
-                repo.apply(batchId, items)
+                val res = repo.apply(batchId, items)
+
+                val notifs = res.notifications.orEmpty()
+                if (notifs.isNotEmpty()) {
+                    onNotifications(notifs)
+                }
+
                 onSuccess()
             } catch (e: HttpException) {
                 val body = try { e.response()?.errorBody()?.string() } catch (_: Exception) { null }

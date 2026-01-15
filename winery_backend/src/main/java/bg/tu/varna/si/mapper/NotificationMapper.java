@@ -8,7 +8,6 @@ public class NotificationMapper {
 
     public static NotificationResponseDTO toDTO(Notification entity) {
         NotificationResponseDTO dto = new NotificationResponseDTO();
-
         dto.id = entity.id;
         dto.type = entity.type;
         dto.resourceType = entity.resourceType;
@@ -17,7 +16,6 @@ public class NotificationMapper {
         dto.message = entity.message;
         dto.createdAt = entity.createdAt != null ? entity.createdAt.toString() : null;
         dto.isRead = entity.isRead;
-
         return dto;
     }
 

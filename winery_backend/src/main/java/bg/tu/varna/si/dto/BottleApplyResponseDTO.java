@@ -6,6 +6,7 @@ public class BottleApplyResponseDTO {
     public Long batchId;
     public double bottledNowLiters;
     public double totalBottledLiters;
-    public double leftoverLiters; // remaining after bottling (produced - totalBottled)
+    public double leftoverLiters; // (produced - totalBottled)
     public List<BottlePlanItemDTO> items;
+    public List<NotificationResponseDTO> notifications;
 }

@@ -10,18 +10,14 @@ public class WineBatch extends PanacheEntity {
 
     @ManyToOne
     public WineType wineType;
-
     public double plannedLiters;
     public double producedLiters;
-
     public LocalDateTime createdAt;
-
     @ManyToOne
     public AppUser createdBy;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     public WineBatchStatus status = WineBatchStatus.PLANNED;
-
-    public double bottledLiters;
+    @Column(nullable = false)
+    public double bottledLiters = 0.0;
 }

@@ -9,12 +9,9 @@ public class GrapeStockMovement extends PanacheEntity {
 
     @ManyToOne
     public GrapeVariety variety;
-
     public double quantityKg;    // +IN, -OUT
-    public String movementType;  // IN, OUT, ADJUSTMENT
-
+    public String movementType;  // IN, OUT
     public LocalDateTime createdAt = LocalDateTime.now();
-
     @ManyToOne
     public AppUser createdBy;
 }

@@ -1,17 +1,23 @@
 package bg.tu.varna.si.winery.ui.batches
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import bg.tu.varna.si.winery.dto.WineBatchGrapeUsageDto
 import bg.tu.varna.si.winery.dto.WineBatchResponseDto
+import bg.tu.varna.si.winery.notifications.WineryNotifier
 import bg.tu.varna.si.winery.ui.bottling.BottlingPlanDialog
 import bg.tu.varna.si.winery.ui.bottling.BottlingViewModel
+
 import kotlin.math.abs
 
 @Composable
@@ -26,22 +32,28 @@ fun WineBatchDetailsScreen(
     val error by vm.error.collectAsState()
     val saving by vm.saving.collectAsState()
 
-    // bottling vm state
     val plan by bottlingVm.plan.collectAsState()
     val leftover by bottlingVm.leftover.collectAsState()
     val bLoading by bottlingVm.loading.collectAsState()
     val bSaving by bottlingVm.saving.collectAsState()
     val bError by bottlingVm.error.collectAsState()
 
+    val ctx = LocalContext.current
+
     var showBottlingDialog by remember { mutableStateOf(false) }
+    var priorityBottleTypeId by remember { mutableStateOf<Long?>(null) }
 
     LaunchedEffect(id) { vm.load(id) }
+
+    val scrollState = rememberScrollState()
 
     Column(
         Modifier
             .fillMaxSize()
+            .verticalScroll(scrollState)
             .padding(contentPadding)
-            .padding(16.dp),
+            .padding(16.dp)
+            .imePadding(),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Text("Batch details", style = MaterialTheme.typography.titleLarge)
@@ -58,16 +70,34 @@ fun WineBatchDetailsScreen(
             return@Column
         }
 
+        val status = b.status.trim().uppercase()
+        val isCancelled = status == "CANCELLED"
+        val isBottled = status == "BOTTLED"
+        val isCompleted = status == "COMPLETED"
+
+        val remainingLiters = (b.producedLiters - b.bottledLiters).coerceAtLeast(0.0)
+        val hasProducedWine = b.producedLiters > 0.0
+        val hasRemainingToBottle = remainingLiters > 0.0
+
         BatchSummaryCard(
             b = b,
             saving = saving,
             onSetProduced = { produced ->
                 vm.setProduced(id = b.id, producedLiters = produced)
             },
-            onCancel = {
-                vm.cancel(b.id)
-            }
+            onCancel = { vm.cancel(b.id) }
         )
+
+        Card(Modifier.fillMaxWidth()) {
+            Row(
+                Modifier.padding(12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Produced: ${formatNumber(b.producedLiters)} L ")
+                Text("Bottled: ${formatNumber(b.bottledLiters)} L ")
+                Text("Remaining: ${formatNumber(remainingLiters)} L")
+            }
+        }
 
         Spacer(Modifier.height(6.dp))
 
@@ -86,42 +116,78 @@ fun WineBatchDetailsScreen(
             Text("Bottling error: $bError", color = MaterialTheme.colorScheme.error)
         }
 
+        val canPlanBottling =
+            !bSaving && !bLoading &&
+                    !isCancelled && !isBottled &&
+                    hasProducedWine && hasRemainingToBottle
+
         Button(
             modifier = Modifier.fillMaxWidth(),
-            enabled = !bSaving && !bLoading,
+            enabled = canPlanBottling,
             onClick = {
                 showBottlingDialog = true
-                bottlingVm.loadPlanPrefer750(b.id) // default: priority 750
+                bottlingVm.loadPlanDefault(b.id)
             }
         ) {
-            Text(if (bLoading) "Loading plan..." else "Plan bottling (prefer 750ml)")
+            val label = when {
+                bLoading -> "Loading plan..."
+                isCancelled -> "Batch is cancelled"
+                isBottled -> "Already bottled"
+                !hasProducedWine -> "No produced wine to bottle"
+                !hasRemainingToBottle -> "Nothing left to bottle"
+                isCompleted -> "Plan bottling"
+                else -> "Plan bottling"
+            }
+            Text(label)
         }
-
-        // try detect 750 typeId from current plan
-        val type750 = plan.firstOrNull { it.volumeMl == 750 }?.bottleTypeId
 
         BottlingPlanDialog(
             show = showBottlingDialog,
             plan = plan,
+            remainingLiters = remainingLiters,
             leftoverLiters = leftover,
             loading = bLoading,
             saving = bSaving,
             error = bError,
-            onDismiss = { showBottlingDialog = false },
-            onRecalculatePrefer750 = { bottlingVm.loadPlanPrefer750(b.id) },
-            onOnly750 = {
-                if (type750 != null) bottlingVm.loadPlanOnlyBottleType(b.id, type750)
-                else bottlingVm.loadPlanPrefer750(b.id) // fallback
+
+            selectedPriorityBottleTypeId = priorityBottleTypeId,
+            onSetPriorityBottleTypeId = { priorityBottleTypeId = it },
+
+            onRecalculate = { preferredId ->
+                bottlingVm.loadPlanPrefer(b.id, preferredId)
             },
+            onOnlySelectedBottle = { bottleTypeId ->
+                bottlingVm.loadPlanOnlyBottleType(b.id, bottleTypeId)
+            },
+
             onSetCount = { bottleTypeId, newCount ->
                 bottlingVm.setCount(bottleTypeId, newCount)
             },
+
             onConfirm = {
-                bottlingVm.apply(b.id) {
-                    showBottlingDialog = false
-                    vm.load(b.id) // refresh details
-                }
-            }
+                bottlingVm.apply(
+                    batchId = b.id,
+                    onNotifications = { list ->
+                        list.forEach { n ->
+                            WineryNotifier.show(
+                                context = ctx,
+                                title = "${n.level}: ${n.type}",
+                                message = n.message
+                            )
+                        }
+                    },
+                    onSuccess = {
+                        WineryNotifier.show(
+                            context = ctx,
+                            title = "Bottling completed",
+                            message = "Batch #${b.id} bottled successfully."
+                        )
+                        showBottlingDialog = false
+                        vm.load(b.id)
+                    }
+                )
+            },
+            onDismiss = { showBottlingDialog = false }
         )
     }
 }
@@ -136,13 +202,20 @@ private fun BatchSummaryCard(
     var showProducedDialog by remember { mutableStateOf(false) }
     var producedText by remember { mutableStateOf(formatNumber(b.producedLiters)) }
     var localError by remember { mutableStateOf<String?>(null) }
-
     var showCancelDialog by remember { mutableStateOf(false) }
 
-    val canCancel = b.status != "COMPLETED" && b.status != "CANCELLED" && !saving
-    val canEditProduced = b.status != "CANCELLED" && !saving
+    val status = b.status.trim().uppercase()
+    val isLockedStatus = status == "COMPLETED" || status == "CANCELLED" || status == "BOTTLED"
 
-    Card(Modifier.fillMaxWidth()) {
+    val canEditProduced = !isLockedStatus && !saving
+    val canCancel = !isLockedStatus && !saving
+
+    val colors = statusColors(b.status)
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = colors.cardBg)
+    ) {
         Column(
             Modifier.padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -153,13 +226,14 @@ private fun BatchSummaryCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(b.wineTypeName, style = MaterialTheme.typography.titleSmall)
-                StatusChip(b.status)
+                StatusChip(status = b.status)
             }
 
             Text("Planned: ${formatNumber(b.plannedLiters)} L")
             Text("Produced: ${formatNumber(b.producedLiters)} L")
+            Text("Bottled: ${formatNumber(b.bottledLiters)} L")
             Text("Created: ${b.createdAt}")
-            Text("By: ${b.createdByFullName ?: "-"} ") //(id=${b.createdById ?: "-"})")
+            Text("By: ${b.createdByFullName ?: "-"}")
 
             if (localError != null) {
                 Text(localError!!, color = MaterialTheme.colorScheme.error)
@@ -223,8 +297,9 @@ private fun BatchSummaryCard(
                         val v = producedText.replace(',', '.').toDoubleOrNull()
                         when {
                             v == null -> localError = "Enter a valid number."
-                            v < 0 -> localError = "Produced liters must be ≥ 0."
+                            v < 0 -> localError = "Produced liters must be greater than 0."
                             v > b.plannedLiters -> localError = "Produced liters cannot exceed planned liters."
+                            v < b.producedLiters -> localError = "The latest production must be >= the previous one (" + b.producedLiters + ")."
                             else -> {
                                 localError = null
                                 onSetProduced(v)
@@ -247,7 +322,7 @@ private fun BatchSummaryCard(
             text = { Text("This will rollback grape usage back to stock and mark the batch as CANCELLED.") },
             confirmButton = {
                 TextButton(
-                    enabled = !saving,
+                    enabled = !saving && !isLockedStatus,
                     onClick = {
                         onCancel()
                         showCancelDialog = false
@@ -268,15 +343,57 @@ private fun UsageRow(u: WineBatchGrapeUsageDto) {
             Modifier.padding(12.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(u.grapeVarietyName)
-            Text("${formatNumber(u.kgUsed)} kg")
+            Text("${u.grapeVarietyName}: ${formatNumber(u.kgUsed)} kg")
         }
     }
 }
 
 @Composable
 private fun StatusChip(status: String) {
-    AssistChip(onClick = {}, label = { Text(status) })
+    val colors = statusColors(status)
+
+    AssistChip(
+        onClick = {},
+        label = { Text(status) },
+        colors = AssistChipDefaults.assistChipColors(
+            containerColor = colors.chipBg,
+            labelColor = colors.chipText
+        )
+    )
+}
+
+private data class StatusUiColors(
+    val cardBg: Color,
+    val chipBg: Color,
+    val chipText: Color
+)
+
+@Composable
+private fun statusColors(status: String): StatusUiColors {
+    val cs = MaterialTheme.colorScheme
+
+    return when (status.trim().uppercase()) {
+        "CANCELLED" -> StatusUiColors(
+            cardBg = cs.errorContainer,
+            chipBg = cs.error,
+            chipText = cs.onError
+        )
+        "COMPLETED", "BOTTLED" -> StatusUiColors(
+            cardBg = cs.tertiaryContainer,
+            chipBg = cs.tertiary,
+            chipText = cs.onTertiary
+        )
+        "PLANNED", "ACTIVE", "IN_PROGRESS", "IN_PRODUCTION" -> StatusUiColors(
+            cardBg = cs.primaryContainer,
+            chipBg = cs.primary,
+            chipText = cs.onPrimary
+        )
+        else -> StatusUiColors(
+            cardBg = cs.surfaceVariant,
+            chipBg = cs.secondaryContainer,
+            chipText = cs.onSecondaryContainer
+        )
+    }
 }
 
 private fun formatNumber(v: Double): String {

@@ -1,9 +1,8 @@
 package bg.tu.varna.si.dto;
 
-public class NotificationResponseDTO {
+public class  NotificationResponseDTO {
     public Long id;
-
-    public String type;         // GRAPE_LOW, BOTTLE_LOW, SHORTAGE
+    public String type;         // GRAPE IS LOW, BOTTLE IS LOW
     public String resourceType; // GRAPE, BOTTLE
     public Long resourceId;
     public String level;        // WARNING, CRITICAL

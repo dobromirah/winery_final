@@ -21,7 +21,6 @@ public class AppUserResource {
     @Inject
     AppUserRepository repo;
 
-
     @GET
     @RolesAllowed("ADMIN")
     public List<AppUserResponseDTO> listAll() {
@@ -45,7 +44,6 @@ public class AppUserResource {
             throw new WebApplicationException("Invalid role: " + dto.role, 400);
         }
 
-        // Unique check (ако имаш уникален индекс по keycloakId)
         AppUser existing = repo.find("keycloakId", dto.keycloakId).firstResult();
         if (existing != null) {
             throw new WebApplicationException("User already exists for keycloakId=" + dto.keycloakId, 409);

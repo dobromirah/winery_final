@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import bg.tu.varna.si.winery.data.repo.WarehouseMovementRepo
 import bg.tu.varna.si.winery.dto.GrapeStockMovementCreateDto
 import bg.tu.varna.si.winery.dto.GrapeVarietyDto
+import bg.tu.varna.si.winery.dto.NotificationDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -42,20 +43,29 @@ class GrapeMovementViewModel(
         }
     }
 
-    fun submit(varietyId: Long, qtyKg: Double, movementType: String) {
+    fun submit(
+        varietyId: Long,
+        qtyKg: Double,
+        movementType: String,
+        onNotifications: (List<NotificationDto>) -> Unit = {}
+    ) {
         viewModelScope.launch {
             _loading.value = true
             _error.value = null
             _success.value = null
             try {
-                repo.createGrapeMovement(
+                val res = repo.createGrapeMovement(
                     GrapeStockMovementCreateDto(
                         varietyId = varietyId,
                         quantityKg = qtyKg,
                         movementType = movementType
                     )
                 )
-                _success.value = "✅ Movement saved"
+
+                val notifs = res.notifications.orEmpty()
+                if (notifs.isNotEmpty()) onNotifications(notifs)
+
+                _success.value = "Movement saved"
             } catch (e: HttpException) {
                 _error.value = "HTTP ${e.code()} (${e.message()})"
             } catch (e: Exception) {

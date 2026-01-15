@@ -7,11 +7,11 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import bg.tu.varna.si.winery.dto.WineTypeDto
-import kotlin.math.ceil
+import bg.tu.varna.si.winery.notifications.WineryNotifier
 import kotlin.math.max
-import kotlin.math.min
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,15 +26,14 @@ fun CreateWineBatchScreen(
     val error by vm.error.collectAsState()
     val created by vm.created.collectAsState()
 
-    // ✅ NEW: max liters based on stock + recipe (from VM)
     val maxLiters by vm.maxLiters.collectAsState()
     val limitInfo by vm.limitInfo.collectAsState()
 
+    val ctx = LocalContext.current
+
     var selected by rememberSaveable { mutableStateOf<WineTypeDto?>(null) }
     var typesExpanded by remember { mutableStateOf(false) }
-
-    // ✅ NEW: slider value
-    var plannedLiters by rememberSaveable { mutableFloatStateOf(0f) }
+    var plannedLitersText by rememberSaveable { mutableStateOf("") }
 
     LaunchedEffect(Unit) { vm.loadTypes() }
 
@@ -44,21 +43,22 @@ fun CreateWineBatchScreen(
         onCreated(b.id)
     }
 
-    // Slider config
     val maxL = (maxLiters ?: 0.0).toFloat()
-    val sliderEnabled = selected != null && maxL > 0f && !saving
 
-    // Steps (nice UX): if max >= 10L, use 0.5L step
-    val step = if (maxL >= 10f) 0.5f else 0.1f
-
-    fun snapToStep(v: Float): Float {
-        if (maxL <= 0f) return 0f
-        val clamped = v.coerceIn(0f, maxL)
-        val snapped = (ceil(clamped / step) * step)
-        return snapped.coerceIn(0f, maxL)
+    val plannedLitersValue: Double? = remember(plannedLitersText) {
+        plannedLitersText.trim().replace(',', '.').toDoubleOrNull()
     }
+    val plannedFloat = (plannedLitersValue ?: 0.0).toFloat()
 
-    val canSubmit = selected != null && plannedLiters > 0f && plannedLiters <= maxL && !saving
+    val inputEnabled = selected != null && maxL > 0f && !saving
+
+    val isPlannedValid =
+        selected != null &&
+                plannedLitersValue != null &&
+                plannedLitersValue > 0.0 &&
+                plannedLitersValue.toFloat() <= maxL
+
+    val canSubmit = isPlannedValid && !saving
 
     Column(
         Modifier
@@ -77,15 +77,12 @@ fun CreateWineBatchScreen(
             Text("Error: $error", color = MaterialTheme.colorScheme.error)
         }
 
-        // Wine type dropdown
         ExposedDropdownMenuBox(
             expanded = typesExpanded,
             onExpandedChange = { typesExpanded = !typesExpanded }
         ) {
             OutlinedTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor(),
+                modifier = Modifier.fillMaxWidth().menuAnchor(),
                 value = selected?.name ?: "Select wine type",
                 onValueChange = {},
                 readOnly = true,
@@ -105,20 +102,17 @@ fun CreateWineBatchScreen(
                             if (id != null) {
                                 selected = t
                                 typesExpanded = false
-                                plannedLiters = 0f
+                                plannedLitersText = ""
                                 vm.onWineTypeSelected(id)
                             }
                         }
-
                     )
                 }
             }
         }
 
-        // ---- Stock-based max liters + slider ----
         if (selected != null) {
             if (maxLiters == null) {
-                // While max liters is loading (or not fetched yet)
                 LinearProgressIndicator(Modifier.fillMaxWidth())
                 Text("Calculating available liters…", style = MaterialTheme.typography.bodyMedium)
             } else {
@@ -135,40 +129,24 @@ fun CreateWineBatchScreen(
                         color = MaterialTheme.colorScheme.error
                     )
                 } else {
-                    // Slider
-                    Slider(
-                        value = plannedLiters.coerceIn(0f, maxL),
-                        onValueChange = { plannedLiters = it },
-                        enabled = sliderEnabled,
-                        valueRange = 0f..maxL
+                    OutlinedTextField(
+                        value = plannedLitersText,
+                        onValueChange = { plannedLitersText = it },
+                        label = { Text("Planned liters") },
+                        placeholder = { Text("e.g. 120") },
+                        supportingText = {
+                            when {
+                                plannedLitersText.isBlank() -> Text("Enter a value between 0 and $maxDisplay L")
+                                plannedLitersValue == null -> Text("Invalid number")
+                                plannedLitersValue <= 0.0 -> Text("Must be greater than 0")
+                                plannedFloat > maxL -> Text("Must be ≤ $maxDisplay L")
+                            }
+                        },
+                        isError = plannedLitersText.isNotBlank() && !isPlannedValid,
+                        enabled = inputEnabled,
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
                     )
-
-                    val plannedDisplay = "%.1f".format(plannedLiters)
-                    Text("Planned liters: $plannedDisplay L", style = MaterialTheme.typography.titleMedium)
-
-                    // quick chips
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        AssistChip(
-                            onClick = { plannedLiters = snapToStep(min(maxL, max(0f, maxL * 0.25f))) },
-                            label = { Text("25%") },
-                            enabled = sliderEnabled
-                        )
-                        AssistChip(
-                            onClick = { plannedLiters = snapToStep(min(maxL, max(0f, maxL * 0.5f))) },
-                            label = { Text("50%") },
-                            enabled = sliderEnabled
-                        )
-                        AssistChip(
-                            onClick = { plannedLiters = snapToStep(min(maxL, max(0f, maxL * 0.75f))) },
-                            label = { Text("75%") },
-                            enabled = sliderEnabled
-                        )
-                        AssistChip(
-                            onClick = { plannedLiters = snapToStep(maxL) },
-                            label = { Text("Max") },
-                            enabled = sliderEnabled
-                        )
-                    }
                 }
             }
         } else {
@@ -180,8 +158,22 @@ fun CreateWineBatchScreen(
             enabled = canSubmit,
             onClick = {
                 val id = selected?.id ?: -1L
-                Log.e("CreateWineBatchUI", "CLICK create selectedId=$id planned=$plannedLiters max=$maxL")
-                vm.create(id, plannedLiters.toDouble())
+                val liters = plannedLitersValue ?: 0.0
+                Log.e("CreateWineBatchUI", "CLICK create selectedId=$id planned=$liters max=$maxL")
+
+                vm.create(
+                    wineTypeId = id,
+                    plannedLiters = liters,
+                    onNotifications = { list ->
+                        list.forEach { n ->
+                            WineryNotifier.show(
+                                context = ctx,
+                                title = "${n.level}: ${n.type}",
+                                message = n.message
+                            )
+                        }
+                    }
+                )
             }
         ) {
             if (saving) {

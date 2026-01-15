@@ -33,22 +33,15 @@ public class WineRecipeResource {
     @Inject
     GrapeVarietyRepository varietyRepository;
 
-    // -------------------------------------------------------
-    // GET ALL
-    // -------------------------------------------------------
-    @GET
-    @RolesAllowed({"ADMIN", "OPERATOR"})
-    public List<WineRecipeResponseDTO> listAll() {
-        return repository.listAll()
-                .stream()
-                .map(WineRecipeMapper::toDTO)
-                .collect(Collectors.toList());
-    }
+//    @GET
+//    @RolesAllowed({"ADMIN", "OPERATOR"})
+//    public List<WineRecipeResponseDTO> listAll() {
+//        return repository.listAll()
+//                .stream()
+//                .map(WineRecipeMapper::toDTO)
+//                .collect(Collectors.toList());
+//    }
 
-    // -------------------------------------------------------
-    // GET ALL RECIPES FOR A WINE TYPE
-    // Example: GET /wine-recipes/wine-type/3
-    // -------------------------------------------------------
     @GET
     @Path("/wine-type/{wineTypeId}")
     @RolesAllowed({"ADMIN", "OPERATOR"})
@@ -59,11 +52,9 @@ public class WineRecipeResource {
                 .collect(Collectors.toList());
     }
 
-    // -------------------------------------------------------
-    // CREATE NEW RECIPE ENTRY
-    // -------------------------------------------------------
+
     @POST
-    @RolesAllowed({"ADMIN"})
+    @RolesAllowed({"OPERATOR"})
     @Transactional
     public WineRecipeResponseDTO create(WineRecipeCreateDTO dto) {
         if (dto == null) throw new WebApplicationException("Body is required", 400);
@@ -91,42 +82,36 @@ public class WineRecipeResource {
         return WineRecipeMapper.toDTO(r);
     }
 
-    // -------------------------------------------------------
-    // UPDATE RECIPE ROW
-    // -------------------------------------------------------
-    @PUT
-    @Path("/{id}")
-    @RolesAllowed("ADMIN")
-    @Transactional
-    public WineRecipeResponseDTO update(@PathParam("id") Long id, WineRecipeCreateDTO dto) {
-        WineRecipe entity = repository.findById(id);
-        if (entity == null) {
-            throw new NotFoundException("Recipe not found");
-        }
+//    @PUT
+//    @Path("/{id}")
+//    @RolesAllowed("OPERATOR")
+//    @Transactional
+//    public WineRecipeResponseDTO update(@PathParam("id") Long id, WineRecipeCreateDTO dto) {
+//        WineRecipe entity = repository.findById(id);
+//        if (entity == null) {
+//            throw new NotFoundException("Recipe not found");
+//        }
+//
+//        WineType wineType = wineTypeRepository.findById(dto.wineTypeId);
+//        if (wineType == null) {
+//            throw new NotFoundException("WineType with ID " + dto.wineTypeId + " not found");
+//        }
+//
+//        GrapeVariety variety = varietyRepository.findById(dto.grapeVarietyId);
+//        if (variety == null) {
+//            throw new NotFoundException("GrapeVariety with ID " + dto.grapeVarietyId + " not found");
+//        }
+//
+//        entity.wineType = wineType;
+//        entity.grapeVariety = variety;
+//        entity.kgPerLiter = dto.kgPerLiter;
+//
+//        return WineRecipeMapper.toDTO(entity);
+//    }
 
-        WineType wineType = wineTypeRepository.findById(dto.wineTypeId);
-        if (wineType == null) {
-            throw new NotFoundException("WineType with ID " + dto.wineTypeId + " not found");
-        }
-
-        GrapeVariety variety = varietyRepository.findById(dto.grapeVarietyId);
-        if (variety == null) {
-            throw new NotFoundException("GrapeVariety with ID " + dto.grapeVarietyId + " not found");
-        }
-
-        entity.wineType = wineType;
-        entity.grapeVariety = variety;
-        entity.kgPerLiter = dto.kgPerLiter;
-
-        return WineRecipeMapper.toDTO(entity);
-    }
-
-    // -------------------------------------------------------
-    // DELETE RECIPE ROW
-    // -------------------------------------------------------
     @DELETE
     @Path("/{id}")
-    @RolesAllowed("ADMIN")
+    @RolesAllowed("OPERATOR")
     @Transactional
     public void delete(@PathParam("id") Long id) {
         boolean deleted = repository.deleteById(id);

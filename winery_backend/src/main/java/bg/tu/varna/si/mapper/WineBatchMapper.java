@@ -3,10 +3,7 @@ package bg.tu.varna.si.mapper;
 import bg.tu.varna.si.dto.WineBatchCreateDTO;
 import bg.tu.varna.si.dto.WineBatchGrapeUsageDTO;
 import bg.tu.varna.si.dto.WineBatchResponseDTO;
-import bg.tu.varna.si.model.AppUser;
-import bg.tu.varna.si.model.WineBatch;
-import bg.tu.varna.si.model.WineBatchGrapeUsage;
-import bg.tu.varna.si.model.WineType;
+import bg.tu.varna.si.model.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,19 +16,15 @@ public class WineBatchMapper {
     ) {
         WineBatchResponseDTO dto = new WineBatchResponseDTO();
         dto.id = entity.id;
-
         dto.wineTypeId = entity.wineType.id;
         dto.wineTypeName = entity.wineType.name;
-
         dto.plannedLiters = entity.plannedLiters;
         dto.producedLiters = entity.producedLiters;
+        dto.bottledLiters = entity.bottledLiters;
         dto.status = entity.status != null ? entity.status.name() : "PLANNED";
-
-
         dto.createdAt = entity.createdAt != null ? entity.createdAt.toString() : null;
         dto.createdById = entity.createdBy != null ? entity.createdBy.id.intValue() : null;
         dto.createdByFullName = entity.createdBy != null ? entity.createdBy.fullName : null;
-
         dto.grapeUsage = usages.stream()
                 .map(u -> {
                     WineBatchGrapeUsageDTO item = new WineBatchGrapeUsageDTO();
@@ -41,19 +34,18 @@ public class WineBatchMapper {
                     return item;
                 })
                 .collect(Collectors.toList());
-
         return dto;
     }
 
-    public static WineBatch fromCreateDTO(WineBatchCreateDTO dto,
-                                          WineType wineType,
-                                          AppUser user) {
+    public static WineBatch fromCreateDTO(WineBatchCreateDTO dto, WineType wineType, AppUser user) {
         WineBatch entity = new WineBatch();
         entity.wineType = wineType;
         entity.plannedLiters = dto.plannedLiters;
-        entity.producedLiters = 0.0; // to be updated later if needed
+        entity.producedLiters = 0.0;
+        entity.bottledLiters = 0.0;
         entity.createdAt = java.time.LocalDateTime.now();
         entity.createdBy = user;
+        entity.status = WineBatchStatus.PLANNED;
         return entity;
     }
 }

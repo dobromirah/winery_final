@@ -24,11 +24,8 @@ public class BottleTypeResource {
     @Inject
     BottleTypeRepository repository;
 
-    // -------------------------------------------------------
-    // GET ALL
-    // -------------------------------------------------------
     @GET
-//    @Authenticated
+    @RolesAllowed({"ADMIN", "WAREHOUSE_MANAGER", "OPERATOR"})
     public List<BottleTypeResponseDTO> listAll() {
         return repository.listAll()
                 .stream()
@@ -36,11 +33,8 @@ public class BottleTypeResource {
                 .collect(Collectors.toList());
     }
 
-    // -------------------------------------------------------
-    // CREATE
-    // -------------------------------------------------------
     @POST
-    @RolesAllowed("ADMIN")
+    @RolesAllowed({"WAREHOUSE_MANAGER"})
     @Transactional
     public BottleTypeResponseDTO create(BottleTypeCreateDTO dto) {
         BottleType entity = BottleTypeMapper.fromCreateDTO(dto);
@@ -49,55 +43,45 @@ public class BottleTypeResource {
         return BottleTypeMapper.toDTO(entity);
     }
 
-    // -------------------------------------------------------
-    // GET BY ID
-    // -------------------------------------------------------
     @GET
     @Path("/{id}")
+    @RolesAllowed({"ADMIN", "WAREHOUSE_MANAGER", "OPERATOR"})
     public BottleTypeResponseDTO getById(@PathParam("id") Long id) {
         BottleType entity = repository.findById(id);
 
         if (entity == null) {
             throw new NotFoundException("Bottle type not found");
         }
-
         return BottleTypeMapper.toDTO(entity);
     }
 
+//    @PUT
+//    @Path("/{id}")
+//    @RolesAllowed({"WAREHOUSE_MANAGER"})
+//    @Transactional
+//    public BottleTypeResponseDTO update(@PathParam("id") Long id, BottleTypeCreateDTO dto) {
+//        BottleType entity = repository.findById(id);
+//
+//        if (entity == null) {
+//            throw new NotFoundException("Bottle type not found");
+//        }
+//
+//        entity.volumeMl = dto.volumeMl;
+//        entity.description = dto.description;
+//        entity.criticalMinQty = dto.criticalMinQty;
+//
+//        return BottleTypeMapper.toDTO(entity);
+//    }
 
-    // -------------------------------------------------------
-    // UPDATE BY ID
-    // -------------------------------------------------------
-    @PUT
-    @Path("/{id}")
-    @RolesAllowed("ADMIN")
-    @Transactional
-    public BottleTypeResponseDTO update(@PathParam("id") Long id, BottleTypeCreateDTO dto) {
-        BottleType entity = repository.findById(id);
-
-        if (entity == null) {
-            throw new NotFoundException("Bottle type not found");
-        }
-
-        entity.volumeMl = dto.volumeMl;
-        entity.description = dto.description;
-        entity.criticalMinQty = dto.criticalMinQty;
-
-        return BottleTypeMapper.toDTO(entity);
-    }
-
-    // -------------------------------------------------------
-    // DELETE BY ID
-    // -------------------------------------------------------
-    @DELETE
-    @Path("/{id}")
-    @RolesAllowed("ADMIN")
-    @Transactional
-    public void delete(@PathParam("id") Long id) {
-        boolean deleted = repository.deleteById(id);
-
-        if (!deleted) {
-            throw new NotFoundException("Bottle type not found");
-        }
-    }
+//    @DELETE
+//    @Path("/{id}")
+//    @RolesAllowed({"WAREHOUSE_MANAGER"})
+//    @Transactional
+//    public void delete(@PathParam("id") Long id) {
+//        boolean deleted = repository.deleteById(id);
+//
+//        if (!deleted) {
+//            throw new NotFoundException("Bottle type not found");
+//        }
+//    }
 }

@@ -9,9 +9,7 @@ public class WineBatchGrapeUsage extends PanacheEntity {
 
     @ManyToOne
     public WineBatch batch;
-
     @ManyToOne
     public GrapeVariety variety;
-
     public double quantityKg;
 }

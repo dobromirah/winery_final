@@ -62,7 +62,7 @@ fun WineTypesAdminScreen(
                         expanded = colorExpanded,
                         onDismissRequest = { colorExpanded = false }
                     ) {
-                        listOf("WHITE", "RED").forEach { c ->
+                        listOf("WHITE", "RED", "ROSE").forEach { c ->
                             DropdownMenuItem(
                                 text = { Text(c) },
                                 onClick = {
@@ -77,7 +77,7 @@ fun WineTypesAdminScreen(
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
-                    label = { Text("Description (optional)") },
+                    label = { Text("Description") },
                     modifier = Modifier.fillMaxWidth()
                 )
 

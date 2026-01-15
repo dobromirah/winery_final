@@ -1,4 +1,5 @@
 package bg.tu.varna.si.dto;
+import java.util.List;
 
 public class BottleStockMovementResponseDTO {
     public Long id;
@@ -9,4 +10,6 @@ public class BottleStockMovementResponseDTO {
     public String createdAt;
     public Long createdById;
     public String createdByFullName;
+    public List<NotificationResponseDTO> notifications;
+
 }
